@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+"""
+Perform evaluation
+"""
+
+import sys, os, getopt
+import mleval
+from mleval.evaluation import pm
+from mleval.parse import parse_floats
+
+def usage():
+    msg = [mleval.PROGRAM_NAME + ', Version ' + mleval.VERSION + """
+
+Usage: """ + sys.argv[0] + """ [options] <output-filename> <truth-filename>
+
+Options:
+
+--pm="<perf_measure>"
+    Performance Measure
+
+
+Supported performance measures are:
+
+"""]
+
+    for k in pm.keys():
+        msg.append('  "%s"\n' % k)
+        msg.append('  %s\n\n' % pm[k][2])
+
+    print ''.join(msg)
+
+def parse_options():
+    """Parse given options."""
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], '',
+            ['pm='])
+    except getopt.GetoptError, err: # print help information and exit
+        print str(err) + "\n"
+        usage()
+        sys.exit(1)
+
+    perf_measure=None
+
+    for o, a in opts:
+        if o in ('--pm'):
+            perf_measure = a
+        else:
+            print 'Unhandled option: ', o
+            sys.exit(2)
+
+    if len(args)!=2 or not perf_measure:
+        usage()
+        sys.exit(1)
+
+    # pm, outputs, true labels
+    return (perf_measure, args[0], args[1])
+
+if __name__ == "__main__":
+    argc = len(sys.argv)
+    if  argc < 3:
+        usage()
+        sys.exit(1)
+
+    perf_measure, outputfile, labelfile = parse_options()
+
+    outputs=parse_floats(file(outputfile))
+    labels=parse_floats(file(labelfile))
+
+    print pm[perf_measure][0](outputs, labels)
