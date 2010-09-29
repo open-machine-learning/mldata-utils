@@ -1,0 +1,218 @@
+"""
+Convert from and to HDF5 (spec of mldata.org)
+"""
+
+ALLOWED_SEPERATORS = (None, ',', ' ', '\t')
+
+TO_H5 = ['libsvm', 'arff', 'csv', 'matlab', 'octave', 'uci']
+FROM_H5 = ['libsvm','arff', 'csv', 'matlab', 'octave', 'xml']
+EPSILON = 1e-15
+
+#1 MB is maximum line len for autodetection
+AUTODETECTION_MAXBUFLEN=1*1024*1024
+
+import os, sys, numpy, h5py
+from gettext import gettext as _
+from scipy.sparse import csc_matrix
+#from decimal import Decimal, InvalidOperation
+
+import ml2h5.fileformat
+from h5_arff import H5_ARFF
+from h5_libsvm import H5_LibSVM
+from h5_csv import H5_CSV
+from h5_mat import H5_MAT
+from h5_octave import H5_OCTAVE
+from h5_uci import H5_UCI
+from basehandler import BaseHandler
+
+HANDLERS = {
+    'libsvm': H5_LibSVM,
+    'arff': H5_ARFF,
+    'csv': H5_CSV,
+    'matlab': H5_MAT,
+    'octave' : H5_OCTAVE,
+    'uci' : H5_UCI,
+    'h5': BaseHandler
+}
+
+class ConversionError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+
+class Converter(object):
+    """Convert and verify conversion.
+
+    @ivar fname_in: name of in-file
+    @type fname_in: string
+    @ivar fname_out: name of out-file
+    @type fname_out: string
+    @ivar format_in: format of in-file
+    @type format_in: string
+    @ivar format_out: format of out-file
+    @type format_out: string
+    @ivar handler_in: handler object to read data in a specific format
+    @type handler_in: derivate of BaseHandler
+    @ivar handler_out: handler object to write data in a specific format
+    @type handler_out: derivate of BaseHandler
+    """
+
+    def __init__(self, fname_in, fname_out, format_in=None, format_out=None, seperator=None, attribute_names_first=False):
+        """
+        @param fname_in: name of in-file
+        @type fname_in: string
+        @param fname_out: name of out-file
+        @type fname_out: string
+        @param format_in: format of in-file
+        @type format_in: string
+        @param format_out: format of out-file
+        @type format_out: string
+        @param seperator: seperator to seperate variables in examples
+        @type seperator: string
+        @param attribute_names_first: first line contains attributes (for CSV only)
+        @type attribute_names_first: boolean
+        """
+        self.fname_in = fname_in
+        self.fname_out = fname_out
+        if format_in:
+            self.format_in = format_in
+        else:
+            self.format_in = ml2h5.fileformat.get(fname_in)
+        if format_out:
+            self.format_out = format_out
+        else:
+            self.format_out = ml2h5.fileformat.get(fname_out)
+
+        try:
+            self.handler_in = HANDLERS[self.format_in](fname_in, seperator)
+            if self.format_in == 'csv':
+                self.handler_in.attribute_names_first = attribute_names_first
+            self.handler_out = HANDLERS[self.format_out](fname_out, seperator)
+            if self.format_out == 'csv':
+                self.handler_out.attribute_names_first = attribute_names_first
+        except KeyError:
+            raise ConversionError(
+                'Unknown conversion pair %s to %s!' % (self.format_in, self.format_out))
+        except Exception, e: # reformat all other exceptions to ConversionError
+            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
+
+
+    def run(self, verify=False, remove_out=True):
+        """Convert to/from HDF5.
+
+        @param verify: verify if data in output is same as data in input
+        @type verify: boolean
+        @param remove_out: if output file shall be removed before running.
+        @type remove_out: boolean
+        """
+
+        # sometimes it seems files are not properly overwritten when opened by
+        # 'w' during run().
+        if remove_out and os.path.exists(self.fname_out):
+            os.remove(self.fname_out)
+
+        try:
+            if self.format_in == 'csv':
+                data = self.handler_in.read()
+            else:
+                data = self.handler_in.read()
+            self.handler_out.write(data)
+            if verify:
+                self.verify()
+        except Exception, e: # reformat all exceptions to ConversionError
+            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
+
+
+    def _compare(self, A, B):
+        """Compare given matrices A and B.
+
+        Used by verification process.
+
+        @param A: list A to compare
+        @type A: list of list
+        @param B: list B to compare
+        @type B: list of list
+        """
+    #        eps_dec = Decimal(str(EPSILON))
+        xrange_A0 = xrange(len(A[0]))
+        for i in xrange(len(A)):
+            Ai = A[i]
+            Bi = B[i]
+            for j in xrange_A0:
+                try:
+    #                    a = Decimal(str(Ai[j]))
+    #                    b = Decimal(str(Bi[j]))
+    #                    if abs(a - b) > eps_dec:
+                    if abs(Ai[j] - Bi[j]) > EPSILON:
+                        return False
+                except TypeError: #string
+                    if str(Ai[j]) != str(Bi[j]):
+                        return False
+    #                except InvalidOperation: # string
+    #                    if str(Ai[j]) != str(Bi[j]):
+    #                        return False
+        return True
+
+
+    def _get_datablock(self, ordering, data):
+        """Join given data elements into one big block.
+
+        Joining individual vectors/matrices ->
+        the need to construct this seems really inefficient - maybe should
+        reconsider what read() returns.
+
+        @param ordering: ordering of data elements
+        @type ordering: list of strings
+        @param data: data elements to join
+        @type data: dict
+        """
+        if type(data) != dict: # if read from HDF5
+            return data
+
+        if 'indptr' in data: # sparse:
+            block = csc_matrix((data['data'], data['indices'], data['indptr'])).todense().tolist()
+        else:
+            block = []
+            for name in ordering:
+                if name == 'label': continue
+                if type(data[name]) == numpy.matrix:
+                    for row in data[name]:
+                        block.append(row.tolist()[0])
+                else:
+                    block.append(data[name])
+            block = numpy.matrix(block).T.tolist()
+
+        return block
+
+
+    def verify(self):
+        """Verify that data in given files is the same.
+
+        @return: true if verification succeeds
+        @rtype: boolean
+        @raises: ConversionError
+        """
+        if self.format_in == 'uci':
+            raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_in)
+        if self.format_out == 'uci':
+            raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_out)
+
+        data_in = self.handler_in.read()
+        data_out = self.handler_out.read()
+
+        if 'label' in data_in:
+            if not self._compare(data_in['label'], data_out['label']):
+                raise ConversionError(
+                    'Verification failed! Labels of %s != %s' % (self.fname_in, self.fname_out)
+                )
+
+        block_in = self._get_datablock(data_in['ordering'], data_in['data'])
+        block_out = self._get_datablock(data_out['ordering'], data_out['data'])
+        if not self._compare(block_in, block_out):
+            raise ConversionError(
+                'Verification failed! Data of %s != %s' % (self.fname_in, self.fname_out)
+            )
+
+        return True

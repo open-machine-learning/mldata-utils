@@ -1,0 +1,78 @@
+0.3.6 2010/08/27 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Added a fix when data.get_correct internally receives an array of array with
+  values instead an array with values.
+* Added support for sparse matrices in data.get_correct.
+
+
+0.3.5 2010/08/25 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Introduced task.get_test_output to get test_idx and output_variables from Task file.
+* Introduced data.get_correct() to get the 'correct' results from Data file.
+* Fixed minor issus when converting to octave/matlab.
+
+
+0.3.4 2010/08/24 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Fixed an issue with data extracts.
+* Fixed an issue when updating Task files.
+
+
+0.3.3 2010/08/23 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Fixed a few issues when converting to arff/octave/matlab.
+
+
+0.3.2 2010/08/21 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* task.create now includes handling of input/output variables.
+* Fixed a little error handling octave files.
+
+
+0.3.1 2010/08/20 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Had removed too much from data.get_extract and put it back in.
+* Added safeguard for illegal task files with no output_variables.
+
+
+0.3.0 2010/08/19 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Restructured package into more different modules.
+* Revamped conversion structure.
+* Bugfix re Task vs output variables.
+
+
+0.2.4 2010/08/17 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Caught a few more error conditions when handlings Task.
+* Temporarily removed author from package information because it threw ugly
+  error message on older python installations.
+
+
+0.2.3 2010/08/17 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Removed label_dims and improved support for input/output variables for Tasks.
+* Created new module 'data' for better encapsulation.
+
+
+0.2.2 2010/08/16 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Added extract function (and script) for Task datasets.
+* Moved extract function for Data from website to this tool.
+
+
+0.2.1 2010/08/02 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Improved handling of Task files.
+
+
+0.2.0 2010/07/21 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Introduced CHANGELOG.
+* Moved Task-related code into its own-module.
+* Added code to save data from Task object into Task file.
+
+
+0.1.0 2010/07/13 by Sebastian Henschel <mldata@kodeaffe.de>
+
+* Initial release as package.
