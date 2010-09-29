@@ -6,7 +6,7 @@ Perform evaluation
 import sys, os, getopt
 import mleval
 from mleval.evaluation import pm
-from mleval.parse import parse_floats
+from mleval.parse import brute_force_parse
 
 def usage():
     msg = [mleval.PROGRAM_NAME + ', Version ' + mleval.VERSION + """
@@ -62,8 +62,31 @@ if __name__ == "__main__":
         sys.exit(1)
 
     perf_measure, outputfile, labelfile = parse_options()
+    try:
+        of=file(outputfile)
+    except IOError:
+        print "could not open output_file '%s'" % outputfile
+        sys.exit(1)
 
-    outputs=parse_floats(file(outputfile))
-    labels=parse_floats(file(labelfile))
+    try:
+        lf=file(labelfile)
+    except IOError:
+        print "could not open truth_file '%s'" % labelfile
+        sys.exit(1)
+
+
+    if not pm.has_key(perf_measure):
+        print "not a valid performance measure"
+        sys.exit(1)
+
+    try:
+        outputs, labels=brute_force_parse(of, lf)
+    except Exception, err:
+        print err
+        sys.exit(2)
+
+    if len(outputs)!=len(labels):
+        print "outputs and label length don't match"
+        sys.exit(2)
 
     print pm[perf_measure][0](outputs, labels)
