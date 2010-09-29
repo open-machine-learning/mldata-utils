@@ -2,7 +2,7 @@
 Utility functions to perform evaluations, mostly for mldata.org.
 """
 
-VERSION = '0.3.7'
+VERSION = '0.0.1'
 PROGRAM_NAME = 'mleval'
 DESCRIPTION = 'Compute evaluation scores (accuracy, auROC,...)'
 LONG_DESCRIPTION = """
