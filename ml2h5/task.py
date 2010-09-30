@@ -9,6 +9,12 @@ import ml2h5.data
 from . import VERSION_MLDATA, COMPRESSION
 
 
+def update_object(h5, name, value):
+    if name in h5.keys():
+        del h5[name]
+
+    h5[name] = value
+
 def get_splitnames(fnames):
     """Helper function to get names of splits.
 
@@ -131,31 +137,31 @@ def update_description(h5, task):
     else:
         group = h5['task_descr']
 
-    group['pub_date'] = _encode(task.pub_date)
-    group['version'] = task.version
-    group['slug'] = _encode(task.slug.text)
-    group['summary'] = _encode(task.summary)
-    group['description'] = _encode(task.description)
-    group['urls'] = _encode(task.urls)
-    group['publications'] =\
-        ''.join([_encode(p.title) for p in task.publications.all()])
-    group['is_public'] = _encode(task.is_public)
-    group['is_deleted'] = _encode(task.is_deleted)
-    group['is_current'] = _encode(task.is_current)
-    group['user'] = _encode(task.user.username)
-    group['downloads'] = task.downloads
-    group['hits'] = task.hits
+    update_object(group, 'pub_date', _encode(task.pub_date))
+    update_object(group, 'version', task.version)
+    update_object(group, 'slug', _encode(task.slug.text))
+    update_object(group, 'summary', _encode(task.summary))
+    update_object(group, 'description', _encode(task.description))
+    update_object(group, 'urls', _encode(task.urls))
+    update_object(group, 'publications',\
+        ''.join([_encode(p.title) for p in task.publications.all()]))
+    update_object(group, 'is_public', _encode(task.is_public))
+    update_object(group, 'is_deleted', _encode(task.is_deleted))
+    update_object(group, 'is_current', _encode(task.is_current))
+    update_object(group, 'user', _encode(task.user.username))
+    update_object(group, 'downloads', task.downloads)
+    update_object(group, 'hits', task.hits)
 
-    group['input'] = _encode(task.input)
-    group['output'] = _encode(task.output)
-    group['performance_measure'] = _encode(task.performance_measure.name)
-    group['performance_ordering'] = _encode(task.performance_ordering)
-    group['type'] = _encode(task.type.name)
-    group['data'] = _encode(task.data.name)
+    update_object(group, 'input', _encode(task.input))
+    update_object(group, 'output', _encode(task.output))
+    update_object(group, 'performance_measure', _encode(task.performance_measure.name))
+    update_object(group, 'performance_ordering', _encode(task.performance_ordering))
+    update_object(group, 'type', _encode(task.type.name))
+    update_object(group, 'data', _encode(task.data.name))
     if task.data_heldback:
-        group['data_heldback'] = _encode(task.data_heldback.name)
-    group['license'] = _encode(task.license.name)
-    group['tags'] = _encode(task.tags)
+        update_object(group, 'data_heldback', _encode(task.data_heldback.name))
+    update_object(group, 'license', _encode(task.license.name))
+    update_object(group, 'tags', _encode(task.tags))
 
     return True
 
@@ -207,9 +213,10 @@ def create(fname, task, taskfile=None):
     except:
         return False
 
-    h5['name'] = _encode(task.name)
-    h5['mldata'] = VERSION_MLDATA
-    h5['comment'] = 'Task file'
+
+    update_object(h5, 'name', _encode(task.name))
+    update_object(h5, 'mldata', VERSION_MLDATA)
+    update_object(h5, 'comment', 'Task file')
 
     error = False
     if not update_description(h5, task):
