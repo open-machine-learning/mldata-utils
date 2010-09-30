@@ -158,6 +158,24 @@ def calcprcscore(out, lab):
 pm['Area under Precision Recall Curve'] = (calcprcscore, 'Classification', calcprcscore.__doc__)
 
 
+def mean_absolute_error(self, out, truth):
+    """ Regression evaluation using Mean Absolute Error
+    This function will calculate MAE between two matrices
+    """
+    return numpy.mean(numpy.abs(out-truth))
+pm['Mean Absolute Error'] = (mean_absolute_error, 'Regression', mean_absolute_error.__doc__)
+
+def root_mean_squared_error(self, out, truth):
+    """
+        Regression evaluation using Root Mean Squared Error (RMSE)
+        Expects out and truth to be real valued vectors
+    """
+    return numpy.sqrt(numpy.mean((out-truth)**2))
+
+pm['Root Mean Squared Error'] = (root_mean_squared_error, 'Regression', root_mean_squared_error.__doc__)
+
+
+# Some helper functions follow
 
 def compute_area(a,b):
     """ Helper function to compute area """
