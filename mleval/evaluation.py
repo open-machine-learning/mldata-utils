@@ -1,17 +1,30 @@
 import numpy
 
 """
-dictionary of known performance measures:
+dictionaries of known performance measures:
 
-keys are human readable names
-values are tuples of 
-(functioname, application domain ('Classification', 'Regression', ...), description)
+keys are human readable names, values are tuples of (functioname, description)
 
-pm['Balanced Error'] = (calcbal, 'Classification',
-"Computes the Balanced Error. Expects labels to be +/-1 and predictions sign(output)"
+pm              - is a dictionary of all the measures
+pm_hierarchy    - is a dictionary of tasks specific perf measures (e.g. for
+                    Classification, Regression, ...).
+
+To add a new measure just add a function, e.g. 
+
+def calcbal(out, lab):
+    "Computes the Balanced Error"
+    ...
+
+and add it to the the appropriate dictionary
+
+cpm['Balanced Error'] = (calcbal, calcbal.__doc__)
 
 """
-pm=dict()
+
+rpm = dict() # regression measures
+cpm = dict() # two-class classification measures
+
+pm_hierarchy = { 'Regression': rpm, 'Classification': cpm }
 
 def calcbal(out, lab):
     """
@@ -23,7 +36,7 @@ def calcbal(out, lab):
     nidx=(lab==-1)
     nerr=numpy.mean(out[nidx]<0)
     return 0.5 * (perr+nerr)
-pm['Balanced Error'] = (calcbal, 'Classification', calcbal.__doc__)
+cpm['Balanced Error'] = (calcbal, calcbal.__doc__)
 
 def accuracy(out, lab):
     """
@@ -31,7 +44,7 @@ def accuracy(out, lab):
       Expects labels to be +/-1 and predictions sign(output)
     """
     return numpy.mean(numpy.sign(out) == lab)
-pm['Accuracy'] = (accuracy, 'Classification', accuracy.__doc__)
+cpm['Accuracy'] = (accuracy, accuracy.__doc__)
 
 def error(out, lab):
     """
@@ -39,7 +52,7 @@ def error(out, lab):
       Expects labels to be +/-1 and predictions sign(output)
     """
     return numpy.mean(numpy.sign(out) != lab)
-pm['Error'] = (error, 'Classification', error.__doc__)
+cpm['Error'] = (error, error.__doc__)
 
 def get_tp(out, lab):
     """
@@ -48,7 +61,7 @@ def get_tp(out, lab):
     """
     pidx=(lab==+1)
     return numpy.sum(numpy.sign(out[pidx])>0)
-pm['True Positive Rate'] = (get_tp, 'Classification', get_tp.__doc__)
+cpm['True Positive Rate'] = (get_tp, get_tp.__doc__)
 
 def get_tn(out, lab):
     """
@@ -57,7 +70,7 @@ def get_tn(out, lab):
     """
     nidx=(lab==-1)
     return numpy.sum(numpy.sign(out[nidx])<0)
-pm['True Negative Rate'] = (get_tn, 'Classification', get_tn.__doc__)
+cpm['True Negative Rate'] = (get_tn, get_tn.__doc__)
 
 def get_fp(out, lab):
     """
@@ -66,7 +79,7 @@ def get_fp(out, lab):
     """
     nidx=(lab==-1)
     return numpy.sum(numpy.sign(out[nidx])>0)
-pm['False Positive Rate'] = (get_fp, 'Classification', get_fp.__doc__)
+cpm['False Positive Rate'] = (get_fp, get_fp.__doc__)
 
 def get_fn(out, lab):
     """
@@ -75,7 +88,7 @@ def get_fn(out, lab):
     """
     pidx=(lab==+1)
     return numpy.sum(numpy.sign(out[pidx])<0)
-pm['False Negative Rate'] = (get_fn, 'Classification', get_fn.__doc__)
+cpm['False Negative Rate'] = (get_fn, get_fn.__doc__)
 
 def calcwracc(out, lab):
     """
@@ -87,7 +100,7 @@ def calcwracc(out, lab):
     tn=get_tn(out, lab)
     fn=get_fn(out, lab)
     return tp/(tp+fn) - fp/(fp+tn)
-pm['Weighted Relative Accuracy'] = (calcwracc, 'Classification', calcwracc.__doc__)
+cpm['Weighted Relative Accuracy'] = (calcwracc, calcwracc.__doc__)
 
 def calcf1(out, lab):
     """
@@ -98,7 +111,7 @@ def calcf1(out, lab):
     fp=get_fp(out, lab)
     fn=get_fn(out, lab)
     return 2.0*tp/(2.0*tp+fp+fn)
-pm['F1 Score'] = (calcf1, 'Classification', calcf1.__doc__)
+cpm['F1 Score'] = (calcf1, calcf1.__doc__)
 
 def calccc(out, lab):
     """
@@ -110,7 +123,7 @@ def calccc(out, lab):
     tn=float(get_tn(out, lab))
     fn=float(get_fn(out, lab))
     return (tp*tn-fp*fn)/numpy.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn))
-pm['Cross Correlation Coefficient'] = (calccc, 'Classification', calccc.__doc__)
+cpm['Cross Correlation Coefficient'] = (calccc, calccc.__doc__)
 
 def calcroc(out, lab):
     """
@@ -121,7 +134,7 @@ def calcroc(out, lab):
     tp=numpy.concatenate( ([1], 1-numpy.cumsum(lab[idx]>0)/float(numpy.sum(lab > 0))) )
     fp=numpy.concatenate( ([1], 1-numpy.cumsum(lab[idx]<0)/float(numpy.sum(lab < 0))) )
     return (fp,tp)
-pm['ROC Curve'] = (calcroc, 'Classification', calcroc.__doc__)
+cpm['ROC Curve'] = (calcroc, calcroc.__doc__)
 
 def calcrocscore(out, lab):
     """
@@ -131,7 +144,7 @@ def calcrocscore(out, lab):
     a,b=calcroc(out,lab)
     score = 0.5*numpy.sum((a[:-1]-a[1:])*(b[:-1]+b[1:]))
     return score
-pm['Area under ROC Curve'] = (calcrocscore, 'Classification', calcrocscore.__doc__)
+cpm['Area under ROC Curve'] = (calcrocscore, calcrocscore.__doc__)
 
 def calcprc(out, lab):
     """
@@ -145,7 +158,7 @@ def calcprc(out, lab):
     recall=numpy.cumsum(pmap)/numpy.double(sum(lab==1))
     precision=numpy.cumsum(pmap)/(numpy.arange(len(pmap),dtype=numpy.double)+1.0)
     return (precision,recall)
-pm['Precision Recall Curve'] = (calcprc, 'Classification', calcprc.__doc__)
+cpm['Precision Recall Curve'] = (calcprc, calcprc.__doc__)
 
 def calcprcscore(out, lab):
     """
@@ -155,25 +168,27 @@ def calcprcscore(out, lab):
     a,b=calcprc(out,lab)
     score = 0.5*numpy.sum((a[:-1]+a[1:])*(b[1:]-b[:-1]))
     return score
-pm['Area under Precision Recall Curve'] = (calcprcscore, 'Classification', calcprcscore.__doc__)
+cpm['Area under Precision Recall Curve'] = (calcprcscore, calcprcscore.__doc__)
 
 
 def mean_absolute_error(self, out, truth):
-    """ Regression evaluation using Mean Absolute Error
-    This function will calculate MAE between two matrices
+    """
+      Regression evaluation using Mean Absolute Error
+      Expects out and truth to be real valued vectors
     """
     return numpy.mean(numpy.abs(out-truth))
-pm['Mean Absolute Error'] = (mean_absolute_error, 'Regression', mean_absolute_error.__doc__)
+rpm['Mean Absolute Error'] = (mean_absolute_error, mean_absolute_error.__doc__)
 
 def root_mean_squared_error(self, out, truth):
     """
-        Regression evaluation using Root Mean Squared Error (RMSE)
-        Expects out and truth to be real valued vectors
+      Regression evaluation using Root Mean Squared Error (RMSE)
+      Expects out and truth to be real valued vectors
     """
     return numpy.sqrt(numpy.mean((out-truth)**2))
+rpm['Root Mean Squared Error'] = (root_mean_squared_error, root_mean_squared_error.__doc__)
 
-pm['Root Mean Squared Error'] = (root_mean_squared_error, 'Regression', root_mean_squared_error.__doc__)
-
+pm = dict(cpm)
+pm.update(rpm)
 
 # Some helper functions follow
 

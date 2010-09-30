@@ -5,7 +5,7 @@ Perform evaluation
 
 import sys, os, getopt
 import mleval
-from mleval.evaluation import pm
+from mleval.evaluation import pm_hierarchy, pm
 from mleval.parse import brute_force_parse
 
 def usage():
@@ -23,9 +23,13 @@ Supported performance measures are:
 
 """]
 
-    for k in pm.keys():
-        msg.append('  "%s"\n' % k)
-        msg.append('  %s\n\n' % pm[k][2])
+    for pm_type in pm_hierarchy.keys():
+        p=pm_hierarchy[pm_type]
+        msg.append('  %s\n  %s\n\n' % (pm_type, len(pm_type)*'='))
+
+        for k in p.keys():
+            msg.append('  "%s"\n' % k)
+            msg.append('  %s\n\n' % p[k][1])
 
     print ''.join(msg)
 
