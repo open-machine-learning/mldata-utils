@@ -131,7 +131,7 @@ def update_description(h5, task):
     else:
         group = h5['task_descr']
 
-    group['pub_date'] = _encode(task.pub_date))
+    group['pub_date'] = _encode(task.pub_date)
     group['version'] = task.version
     group['slug'] = _encode(task.slug.text)
     group['summary'] = _encode(task.summary)
