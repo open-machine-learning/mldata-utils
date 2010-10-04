@@ -144,7 +144,7 @@ def get_extract(fname):
     if '/data_descr/types' in h5:
         extract['types'] = h5['/data_descr/types'][:].tolist()
 
-    extract['data'] = _get_extract_data(h5['/data'])
+    extract['data'] = _get_extract_data(h5)
 
     h5.close()
     return extract

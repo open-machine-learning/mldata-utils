@@ -154,9 +154,8 @@ def update_description(h5, task):
 
     update_object(group, 'input', _encode(task.input))
     update_object(group, 'output', _encode(task.output))
-    update_object(group, 'performance_measure', _encode(task.performance_measure.name))
-    update_object(group, 'performance_ordering', _encode(task.performance_ordering))
-    update_object(group, 'type', _encode(task.type.name))
+    update_object(group, 'performance_measure', _encode(task.performance_measure))
+    update_object(group, 'type', _encode(task.type))
     update_object(group, 'data', _encode(task.data.name))
     if task.data_heldback:
         update_object(group, 'data_heldback', _encode(task.data_heldback.name))
