@@ -26,4 +26,4 @@ along with this program. If not, check
 http://www.gnu.org/licenses/gpl-3.0.html
 """
 
-__all__ = ['evaluation', 'parse']
+__all__ = ['evaluation', 'parse', 'multiclass', 'classification', 'regression']
