@@ -110,7 +110,12 @@ def calcroc(out, lab):
     idx = numpy.argsort(out)
     tp=numpy.concatenate( ([1], 1-numpy.cumsum(lab[idx]>0)/float(numpy.sum(lab > 0))) )
     fp=numpy.concatenate( ([1], 1-numpy.cumsum(lab[idx]<0)/float(numpy.sum(lab < 0))) )
-    return (fp,tp)
+    score = 0.5*numpy.sum((fp[:-1]-fp[1:])*(tp[:-1]+tp[1:]))
+    curve= {'x' : fp,
+            'y' : tp,
+            'x_name' : 'False Positive Rate',
+            'y_name' : 'True Positive Rate'}
+    return (score, 'Curve', curve)
 register(pm, 'ROC Curve', calcroc)
 
 def calcrocscore(out, lab):
@@ -118,9 +123,8 @@ def calcrocscore(out, lab):
       Computes the area under the ROC curve.
       Expects labels to be +/-1 and real-valued predictions
     """
-    a,b=calcroc(out,lab)
-    score = 0.5*numpy.sum((a[:-1]-a[1:])*(b[:-1]+b[1:]))
-    return score
+    
+    return calcroc(out,lab)[0]
 register(pm, 'Area under ROC Curve', calcrocscore)
 
 def calcprc(out, lab):
@@ -134,7 +138,12 @@ def calcprc(out, lab):
 
     recall=numpy.cumsum(pmap)/numpy.double(sum(lab==1))
     precision=numpy.cumsum(pmap)/(numpy.arange(len(pmap),dtype=numpy.double)+1.0)
-    return (precision,recall)
+    score = 0.5*numpy.sum((precision[:-1]+precision[1:])*(recall[1:]-recall[:-1]))
+    curve= {'x' : precision,
+            'y' : recall,
+            'x_name' : 'Precision',
+            'y_name' : 'Recall'}
+    return (score, 'Curve', curve)
 register(pm, 'Precision Recall Curve', calcprc)
 
 def calcprcscore(out, lab):
@@ -142,7 +151,5 @@ def calcprcscore(out, lab):
       Computes the area under the precision recall curve.
       Expects labels to be +/-1 and real-valued predictions
     """
-    a,b=calcprc(out,lab)
-    score = 0.5*numpy.sum((a[:-1]+a[1:])*(b[1:]-b[:-1]))
-    return score
+    return calcprc(out,lab)[0]
 register(pm, 'Area under Precision Recall Curve', calcprcscore)
