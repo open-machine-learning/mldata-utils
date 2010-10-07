@@ -249,11 +249,9 @@ def get_extract(fname):
 
     h5.close()
 
-    if 'output_variables' in extract and type(extract['output_variables']) == numpy.ndarray:
-        extract['output_variables'] = extract['output_variables'][0]
 
 #   reduce train and test split string   
-    for dset in ['train_idx','test_idx']:
+    for dset in ['train_idx','test_idx','input_variables','output_variables']:
 	if dset in extract:
 		extract[dset] = reduce_split_str(extract[dset])
 
