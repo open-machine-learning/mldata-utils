@@ -18,7 +18,7 @@ class H5_OCTAVE(BaseHandler):
         @rtype: boolean
         """
         octf.seek(0)
-        header=self.readline(15)
+        header=octf.readline(15)
         if header.startswith('# Created by '):
             return True
         else:
@@ -37,6 +37,9 @@ class H5_OCTAVE(BaseHandler):
         data=[]
 
         line = octf.readline()
+        if not line:
+            return None
+
         while not line.startswith('#'):
             if line == '':
                 return {'name':'','data':[]}
@@ -44,7 +47,7 @@ class H5_OCTAVE(BaseHandler):
 
 
         # metadata
-        while line.startswith('#'):
+        while line and line.startswith('#'):
             sp=line.split(': ')
             if sp[0]=='# name':
                 name=sp[1][:-1]
@@ -55,8 +58,7 @@ class H5_OCTAVE(BaseHandler):
             line = octf.readline()
 
         # matrix
-        lpos=octf.tell()
-        while (not line.startswith('#')) & (not line == ''):
+        while line and not line.startswith('#'):
             if line.startswith(' '):
                 line=line[1:]
             sp=line[:-1].split(' ')
@@ -72,9 +74,7 @@ class H5_OCTAVE(BaseHandler):
                     conv_sp.append(sp)
 
             data.append(conv_sp)
-            lpos=octf.tell()
             line = octf.readline()
-            octf.seek(lpos)
 
         return  {
             'name':name,
@@ -93,11 +93,11 @@ class H5_OCTAVE(BaseHandler):
             raise ConversionError('Header check failed')
 
         attr=self._next_attr(octf)
-        while attr['name']!='':
+        while attr and attr['name']!='':
             if attr['name']!='__nargin__':
                 data[attr['name']]=attr['data']
                 names.append(attr['name'])
-            attr=self._next_attr()
+            attr=self._next_attr(octf)
 
         if (data.keys==[]):
             raise ConversionError('empty conversion')
