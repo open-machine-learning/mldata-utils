@@ -139,7 +139,7 @@ class BaseHandler(object):
         if '/data_descr/types' in h5:
             contents['types'] = h5['/data_descr/types'][...]
 
-        for name in contents['names']:
+        for name in contents['ordering']:
             vname='/data/' + name
             sp_indices=vname+'_indices'
             sp_indptr=vname+'_indptr'
