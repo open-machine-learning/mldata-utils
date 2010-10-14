@@ -80,20 +80,25 @@ class H5_CSV(BaseHandler):
 
 
     def write(self, data):
+        lengths=dict()
+        for o in data['ordering']:
+            try:
+                lengths[o]=data['data'][o].shape[0]
+            except AttributeError:
+                lengths[o]=len(data['data'][o])
+        l=set(lengths.values())
+        assert(len(l)==1)
+        l=l.pop()
+
         csv = open(self.fname, 'w')
-        try:
-            for i in xrange(len(data['data'])):
-                line = map(str, data['data'][i])
-                if 'label' in data:
-                    label = map(str, data['label'][i])
-                    label = self.seperator.join(label)
-                    line.insert(0, label)
-                csv.write(self.seperator.join(line) + "\n")
-        except KeyError, e:
-            csv.close()
-            os.remove(self.fname)
-            raise KeyError(e)
-        else:
-            csv.close()
+        for i in xrange(l):
+            line=[]
+            for o in data['ordering']:
+                try:
+                    line.extend(map(str, data['data'][o][i]))
+                except:
+                    line.append(str(data['data'][o][i]))
+            csv.write(self.seperator.join(line) + "\n")
+        csv.close()
 
         return True

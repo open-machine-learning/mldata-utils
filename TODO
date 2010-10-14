@@ -1,0 +1,41 @@
+OCTAVE
+======
+- octave i/o currently works only for dense real valued things: support for cell arrays of strings is possible but parser needs to be adjusted like
+
+# name: x
+# type: cell
+# rows: 1
+# columns: 2
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 3
+foo
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 4
+bbal
+
+same holds for sparse matrices which would easily work via
+
+# name: z
+# type: sparse matrix
+# nnz: 2
+# rows: 10
+# columns: 10
+1 2 2
+7 2 1
+
+MATLAB
+======
+- only works only for dense real valued things (scipy/s savemat does not support strings / sparse matrices) - won't be easy to fix - so mark as won'tfix for now
+
+CSV
+===
+- should work for all types but won't work with strings containing "," - no escaping is done here
+
+ARFF
+====
+- should work for all types but won't work with strings containing "," - no escaping is done here

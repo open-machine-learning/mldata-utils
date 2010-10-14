@@ -17,15 +17,12 @@ class H5_OCTAVE(BaseHandler):
         @return: if header exists
         @rtype: boolean
         """
-        return True
-        """
         octf.seek(0)
-        header=self.readline()
+        header=self.readline(15)
         if header.startswith('# Created by '):
             return True
         else:
-        return False
-        """
+            return False
 
     def _next_attr(self, octf):
         """Returns the next atribute in the octave file
@@ -124,20 +121,25 @@ class H5_OCTAVE(BaseHandler):
         @return meta: string of attr informations
         """
         meta='# name: ' + str(name) + '\n'
-        if attr.shape ==(1,):
-            meta+='# type: scalar\n'
-            return meta
-        else: 
+        if type(attr) == list:
             meta+='# type: matrix\n'
-        try:
-            meta+='# rows: ' + str(attr.shape[1]) + '\n'
-        except IndexError:
-            meta+='# rows: 1\n'
-
-        try:
-            meta+='# columns: ' + str(attr.shape[0]) + '\n'
-        except IndexError:
+            meta+='# rows: ' + str(len(attr)) + '\n'
             meta+='# columns: 1\n'
+        else:
+            if attr.shape ==(1,):
+                meta+='# type: scalar\n'
+                return meta
+            else: 
+                meta+='# type: matrix\n'
+            try:
+                meta+='# rows: ' + str(attr.shape[1]) + '\n'
+            except IndexError:
+                meta+='# rows: 1\n'
+
+            try:
+                meta+='# columns: ' + str(attr.shape[0]) + '\n'
+            except IndexError:
+                meta+='# columns: 1\n'
 
         return meta
 
@@ -149,16 +151,21 @@ class H5_OCTAVE(BaseHandler):
         data=''
 
         # Vector
-        if len(attr.shape) == 1:
+        if type(attr) == list:
             for i in attr:
                 data+=' ' +str(i)
             data+='\n'
-        # Matrix
         else:
-            for i in attr:
-                for j in i:
-                    data+=' ' + str(j)
+            if len(attr.shape) == 1:
+                for i in attr:
+                    data+=' ' +str(i)
                 data+='\n'
+            # Matrix
+            else:
+                for i in attr:
+                    for j in i:
+                        data+=' ' + str(j)
+                    data+='\n'
         return data
 
 
@@ -166,9 +173,9 @@ class H5_OCTAVE(BaseHandler):
         of = open(self.fname,'w')
         out = self._oct_header()
 
-        for i in xrange(len(data['ordering'])):
-            out += self._print_meta(data['data'][i], i)
-            out += self._print_data(data['data'][i])
+        for o in data['ordering']:
+            out += self._print_meta(data['data'][o], o)
+            out += self._print_data(data['data'][o])
 
         of.writelines(out)
         of.close()

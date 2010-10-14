@@ -114,10 +114,7 @@ class Converter(object):
             os.remove(self.fname_out)
 
         try:
-            if self.format_in == 'csv':
-                data = self.handler_in.read()
-            else:
-                data = self.handler_in.read()
+            data = self.handler_in.read()
             self.handler_out.write(data)
             if verify:
                 self.verify()

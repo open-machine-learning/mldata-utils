@@ -27,7 +27,4 @@ class H5_MAT(BaseHandler):
 
 
     def write(self, data):
-        m = {}
-        for i in xrange(len(data['ordering'])):
-            m[str(i)] = numpy.array(data['data'][i][...].tolist())
-        savemat(self.fname, m, appendmat=False)
+        savemat(self.fname, data['data'], appendmat=False)

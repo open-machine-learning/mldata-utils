@@ -128,26 +128,27 @@ class BaseHandler(object):
         # we want the exception handled elsewhere
         h5 = h5py.File(self.fname, 'r')
         contents = {
-            'names': h5['/data_descr/names'][...],
-            'ordering': h5['/data_descr/ordering'][...],
+            'names': h5['/data_descr/names'][...].tolist(),
+            'ordering': h5['/data_descr/ordering'][...].tolist(),
             'name': h5.attrs['name'],
             'comment': h5.attrs['comment'],
             'mldata': h5.attrs['mldata'],
+            'data': dict(),
         }
 
         if '/data_descr/types' in h5:
             contents['types'] = h5['/data_descr/types'][...]
 
-        if 'indices' in h5['/data']:
-            contents['data'] = csc_matrix(
-                (h5['/data/data'], h5['/data/indices'], h5['/data/indptr'])
-            ).todense().tolist()
-            contents['label'] = numpy.matrix(h5['/data/label']).tolist()
-        elif 'label' in h5['/data']:
-            contents['data'] = numpy.matrix(h5['/data/data']).T.tolist()
-            contents['label'] = numpy.matrix(h5['/data/label']).tolist()
-        else:
-            contents['data'] = self._get_complex_data(h5)
+        for name in contents['names']:
+            vname='/data/' + name
+            sp_indices=vname+'_indices'
+            sp_indptr=vname+'_indptr'
+
+            if sp_indices in h5['/data'] and sp_indptr in h5['/data']:
+                contents['data'][name] = csc_matrix((h5[vname], h5[sp_indices], h5[sp_indptr])
+            )
+            else:
+                contents['data'][name] = numpy.array(h5[vname],order='F').T
 
         h5.close()
         return contents
