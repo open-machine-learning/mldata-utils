@@ -57,7 +57,7 @@ class H5_ARFF(BaseHandler):
         return {
             'name': af.relation,
             'comment': af.comment,
-            'types': self._get_types(a),
+            'types': self._get_types(af),
             'names':names,
             'ordering':copy.copy(names),
             'data':data,
