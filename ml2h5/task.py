@@ -249,7 +249,6 @@ def get_extract(fname):
 
     h5.close()
 
-
 #   reduce train and test split string   
     for dset in ['train_idx','test_idx','input_variables','output_variables']:
 	if dset in extract:
@@ -257,6 +256,29 @@ def get_extract(fname):
 
     return extract
 
+def get_split_image(fname):
+    extract = {}
+    try:
+        h5 = h5py.File(fname, 'r')
+    except:
+        return extract
+
+    dsets = ['train_idx', 'test_idx']
+    for dset in dsets:
+        path = '/task/' + dset
+        if path in h5:
+            extract[dset] = h5[path][...]
+    
+    h5.close()
+
+    if len(extract['train_idx'].shape)==1:
+        dim=1
+    else:
+	dim=extract['train_idx'].shape[0]
+    image_data=numpy.zeros([max(extract['train_idx'][-1],extract['test_idx'][-1])+1,dim])
+    image_data[extract['train_idx']]=1
+    image_data[extract['test_idx']]=2
+    return image_data.T
 
 def get_variables(fname):
     """Get input/output variables from given Data file.
