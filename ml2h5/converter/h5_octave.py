@@ -213,14 +213,16 @@ class H5_OCTAVE(BaseHandler):
         """
         meta='# name: ' + str(name) + '\n'
         if type(attr) == numpy.ndarray:
-            if attr.shape ==(1,1):
+            if attr.shape ==(1,1) or attr.shape==(1,):
                 meta+='# type: scalar\n'
-                return meta
-	    	
             else:
         	meta+='# type: matrix\n'
         	meta+='# rows: ' + str(attr.shape[0]) + '\n'
-        	meta+='# columns: ' + str(attr.shape[1]) + '\n'
+		try:
+		    meta+='# columns: ' + str(attr.shape[1]) + '\n'
+		except IndexError:
+		    meta+='# columns: 1\n'
+
 	elif type(attr)== csc_matrix:
 	    meta+='# type: sparse matrix\n'
 	    meta+='# nnz: '+str(attr.nnz) + '\n'
