@@ -6,6 +6,7 @@ setup.py
 ml2h5/__init__.py
 ml2h5/data.py
 ml2h5/fileformat.py
+ml2h5/indexsplit.py
 ml2h5/task.py
 ml2h5/converter/__init__.py
 ml2h5/converter/arff.py
@@ -16,6 +17,13 @@ ml2h5/converter/h5_libsvm.py
 ml2h5/converter/h5_mat.py
 ml2h5/converter/h5_octave.py
 ml2h5/converter/h5_uci.py
+mleval/__init__.py
+mleval/classification.py
+mleval/evaluation.py
+mleval/multiclass.py
+mleval/parse.py
+mleval/regression.py
+mleval/util.py
 scripts/ml2h5conv
 scripts/ml2h5extract_data
 scripts/ml2h5extract_task

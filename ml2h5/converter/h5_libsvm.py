@@ -183,33 +183,46 @@ class H5_LibSVM(BaseHandler):
 
 
     def write(self, data):
+        """ this needs to `transpose' the data """
         libsvm = open(self.fname, 'w')
-        try:
-            if 'label' in data:
-                if len(data['label'][0]) == 1:
-                    is_multilabel = False
-                else:
-                    is_multilabel = True
 
-            for i in xrange(len(data['data'])):
-                out = []
-                if 'label' in data:
+        if 'label' in data.keys():
+            if len(data['data']['label'][0]) == 1:
+                is_multilabel = False
+            else:
+                is_multilabel = True
+
+        lengths=dict()
+        for o in data['ordering']:
+            x=data['data'][o]
+            if numpy.issubdtype(x.dtype, numpy.int):
+                data['data'][o]=x.astype(numpy.float64)
+            try:
+                lengths[o]=data['data'][o].shape[0]
+            except AttributeError:
+                lengths[o]=len(data['data'][o])
+        l=set(lengths.values())
+        assert(len(l)==1)
+        l=l.pop()
+
+        for i in xrange(l):
+            out = []
+            for o in data['ordering']:
+                d=data['data'][o]
+                if o == 'label':
                     if is_multilabel:
                         labels = []
-                        for j in xrange(len(data['label'][i])):
-                            if data['label'][i][j] == 1:
+                        for j in xrange(len(d[i])):
+                            if d[i][j] == 1:
                                 labels.append(str(j))
                         out.append(','.join(labels))
                     else:
                         out.append(str(data['label'][i][0]))
-                for j in xrange(len(data['data'][i])):
-                    out.append(str(j+1) + ':' + str(data['data'][i][j]))
-                libsvm.write(" ".join(out) + "\n")
-        except KeyError, e:
-            libsvm.close()
-            os.remove(self.fname)
-            raise KeyError(e)
-        else:
-            libsvm.close()
+
+            for j in xrange(len(d[i])):
+                out.append(str(j+1) + ':' + str(d[i][j]))
+            libsvm.write(" ".join(out) + "\n")
+
+        libsvm.close()
 
         return True

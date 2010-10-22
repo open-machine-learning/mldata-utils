@@ -54,7 +54,33 @@ class BaseHandler(object):
         return
         print 'WARNING: ' + msg
 
+    def get_data_as_list(self,data):
+        """ this needs to `transpose' the data """
 
+        dl=[]
+
+        lengths=dict()
+        for o in data['ordering']:
+            x=data['data'][o]
+            if numpy.issubdtype(x.dtype, numpy.int):
+                data['data'][o]=x.astype(numpy.float64)
+            try:
+                lengths[o]=data['data'][o].shape[0]
+            except AttributeError:
+                lengths[o]=len(data['data'][o])
+        l=set(lengths.values())
+        assert(len(l)==1)
+        l=l.pop()
+
+        for i in xrange(l):
+            line=[]
+            for o in data['ordering']:
+                try:
+                    line.extend(data['data'][o][i])
+                except:
+                    line.append(data['data'][o][i])
+            dl.append(line)
+        return dl
 
     def _get_complex_data(self, h5):
         """Get 'complex' data structure.
@@ -118,11 +144,11 @@ class BaseHandler(object):
 
 
     def read(self):
-        """Get data, labels and description in-memory 
+        """Get data and description in-memory 
 
         Retrieve contents from file.
 
-        @return: example names, ordering, labels and the examples
+        @return: example names, ordering and the examples
         @rtype: dict of: list of names, list of ordering and dict of examples
         """
         # we want the exception handled elsewhere
@@ -166,10 +192,6 @@ class BaseHandler(object):
         @return: merged data structure
         @rtype: dict
         """
-        # nothing to do if we have one sparse matrix
-        if 'data' and 'indices' and 'indptr' in data['ordering']:
-            return data
-
         merged = {}
         ordering = []
         path = ''
@@ -177,10 +199,6 @@ class BaseHandler(object):
         idx_double = 0
         merging = None
         for name in data['ordering']:
-            if name == 'label':
-                ordering.append(name)
-                continue
-
             val = data['data'][name]
             if len(val) < 1: continue
 
@@ -232,13 +250,13 @@ class BaseHandler(object):
         h5.attrs['comment'] = data['comment']
 
         try:
-            data = self._get_merged(data)
+            #import pdb
+            #pdb.set_trace()
+            #data = self._get_merged(data)
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():
                 group.create_dataset(path, data=val, compression=COMPRESSION)
-            if 'label' in data:
-                group.create_dataset('/data/label', data=data['label'], compression=COMPRESSION)
 
             group = h5.create_group('/data_descr')
             names = numpy.array(data['names']).astype(self.str_type)

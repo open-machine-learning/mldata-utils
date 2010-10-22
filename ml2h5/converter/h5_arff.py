@@ -63,32 +63,6 @@ class H5_ARFF(BaseHandler):
             'data':data,
         }
 
-
-    def get_data_as_list(self,data):
-        """ this needs to `transpose' the data """
-
-        dl=[]
-
-        lengths=dict()
-        for o in data['ordering']:
-            try:
-                lengths[o]=data['data'][o].shape[0]
-            except AttributeError:
-                lengths[o]=len(data['data'][o])
-        l=set(lengths.values())
-        assert(len(l)==1)
-        l=l.pop()
-
-        for i in xrange(l):
-            line=[]
-            for o in data['ordering']:
-                try:
-                    line.extend(data['data'][o][i])
-                except:
-                    line.append(data['data'][o][i])
-            dl.append(line)
-        return dl
-
     def write(self, data):
         af = arff.ArffFile()
         af.data = self.get_data_as_list(data)

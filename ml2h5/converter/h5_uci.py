@@ -36,6 +36,43 @@ class H5_UCI(BaseHandler):
 
         return False
 
+    def _split(self, line):
+        line=line.strip()
+        items = line.split()
+
+        for i in xrange(len(items)):
+            if '\t' in items[i]:
+                old=items.pop(i)
+                new=old.split()
+                for it in new[::-1]:
+                    items.insert(i, it)
+
+        marker_start=line.find('"')
+        if marker_start == -1:
+            return items
+        marker_start=line.find('"')
+        marker_stop=line.find('"', marker_start+1)
+
+        conc_item_idx=line
+        conc_start=None
+        for i in xrange(len(items)):
+            if marker_start == -1 or marker_stop == -1:
+                return items
+
+            if conc_start and '"' in items[i]:
+                for j in xrange(conc_start, i+1):
+                    items.pop(conc_start)
+                conc_str=line[marker_start+1:marker_stop]
+                marker_start=line.find('"', marker_stop+1)
+                marker_stop=line.find('"', marker_start+1)
+
+                items.insert(conc_start, conc_str)
+                conc_start = None
+                continue
+            elif not conc_start and '"' in items[i]:
+                conc_start = i
+
+        return items
 
     def _parse(self):
         fp = open(self.fname, 'r')
@@ -49,10 +86,8 @@ class H5_UCI(BaseHandler):
             if self._ignore_line(line):
                 continue
 
-            if not self.seperator:
-                items = line.strip().split()
-            else:
-                items = line.strip().split(self.seperator)
+            items = self._split(line)
+
             if not num_items: # do some init
                 num_items = len(items)
                 for i in xrange(num_items):
@@ -77,7 +112,6 @@ class H5_UCI(BaseHandler):
     def read(self):
         ordering = []
         predata = self._parse()
-        data = {}
 
         for i in xrange(len(predata)):
             arr = numpy.array(predata[i])
