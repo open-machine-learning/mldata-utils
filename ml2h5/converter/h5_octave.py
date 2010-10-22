@@ -254,6 +254,8 @@ class H5_OCTAVE(BaseHandler):
 	    else:		    
 		for i in attr:
 		    for j in i:
+			if j==int(j):
+			    j=int(j)	
 			data+=' ' + str(j)
 		    data+='\n'
 	# sparse matrix
