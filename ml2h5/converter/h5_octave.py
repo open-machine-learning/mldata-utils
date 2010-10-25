@@ -95,7 +95,6 @@ class H5_OCTAVE(BaseHandler):
                 meta['length']=int(sp[1])
 	    lpos=octf.tell()
             line = octf.readline()
-	
 	octf.seek(lpos)
 	return meta
 
@@ -120,11 +119,11 @@ class H5_OCTAVE(BaseHandler):
 	data=[]
 	for r in range(row):
 	    for c in range(col):
-		(name,dtype,len,col)=self._read_meta(octf)
-		if not dtype=='sq_string':
+		meta=self._read_meta(octf)
+		if not meta['dtype']=='sq_string':
 		    return None
 	    	else:
-		    data.append(self._read_sq_string(octf,len,col))
+		    data.append(self._read_sq_string(octf,meta['length'],meta['elements']))
 	return	data    
 
     def _read_sparse_matrix(self,octf,col,row):
@@ -147,7 +146,6 @@ class H5_OCTAVE(BaseHandler):
         @type octf: opened File
         @return data: matrix
         """
-
 	data=[]
 	line=octf.readline()
 	lpos=octf.tell()
@@ -155,6 +153,7 @@ class H5_OCTAVE(BaseHandler):
             if line.startswith(' '):
                 line=line[1:]
             sp=line[:-1].split(' ')
+
             conv_sp=[]
             try:
                 for i in sp:
@@ -172,7 +171,13 @@ class H5_OCTAVE(BaseHandler):
 	    lpos=octf.tell()
             line = octf.readline()
 	octf.seek(lpos)
-	return numpy.array(data)
+	out =  numpy.array(data)
+#	out.shape=(row,col)
+	if out.shape[0]==1:
+	    out.shape=(out.shape[1],)	
+
+	print 'read data', out.shape, len(data),':' , len(data[0])
+	return out
 
     def read(self):
         data={}
@@ -190,13 +195,13 @@ class H5_OCTAVE(BaseHandler):
                 names.append(attr['name'])
             attr=self._next_attr(octf)
 
-        if (data.keys==[]):
+	if (data.keys==[]):
             raise ConversionError('empty conversion')
 
         return {
             'name': self.get_name(),
             'comment': 'octave',
-            'names':[],
+            'names':names,
             'ordering':names,
             'data':data,
         }
@@ -206,20 +211,76 @@ class H5_OCTAVE(BaseHandler):
     def _oct_header(self):
         return '# Created by mldata.org for Octave 3.0.1\n'
 
+    def _num_matrix(self,m):
+	if type(m)!= numpy.ndarray:
+	    if type(m)==list:
+		try:
+		    m=numpy.array(m)
+		except:
+		    return None
+	    else:
+	        return None 
+	if len(m.shape) == 1:  	    
+	    out=[]    
+	    for i in m:
+		try:
+		    if int(i)!=i:
+			raise ValueError    
+		    out.append(int(i))	
+	    	except:
+		    try:    
+			out.append(float(i))
+		    except:
+			return None	
+	else:
+	    out=[]    
+	    for i in m:
+		row=[]	
+		for j in i:
+		    try:	
+			if int(j)!=j:
+			    raise ValueError		    
+			row.append(int(j))
+		    except:
+			try:
+			    row.append(float(j))	
+			except:
+			    return None
+		out.append(row)   
+	return out
+
+
     def _print_meta(self,attr,name):
         """Return a string of metainformation
 
         @return meta: string of attr informations
         """
+	attr_num=self._num_matrix(attr)
         meta='# name: ' + str(name) + '\n'
         if type(attr) == numpy.ndarray:
             if attr.shape ==(1,1) or attr.shape==(1,):
                 meta+='# type: scalar\n'
-            else:
+	    elif len(attr.shape)==1:
+		if attr_num==None:  
+		    meta+='# type: cell\n'
+		    meta+='# rows: 1\n'
+		    meta+='# columns: ' + str(len(attr)) + '\n'
+		else:    
+        	    meta+='# type: matrix\n'
+		    try:
+			meta+='# rows: ' + str(attr.shape[1]) + '\n'
+		    except IndexError:
+			meta+='# rows: 1\n' 
+		    try:
+			meta+='# columns: ' + str(attr.shape[0]) + '\n'
+		    except IndexError:
+			meta+='# columns: 1\n'
+
+	    else:
         	meta+='# type: matrix\n'
-        	meta+='# rows: ' + str(attr.shape[0]) + '\n'
+        	meta+='# rows: ' + str(attr.shape[1]) + '\n'
 		try:
-		    meta+='# columns: ' + str(attr.shape[1]) + '\n'
+		    meta+='# columns: ' + str(attr.shape[0]) + '\n'
 		except IndexError:
 		    meta+='# columns: 1\n'
 
@@ -245,21 +306,37 @@ class H5_OCTAVE(BaseHandler):
 	if attr==None:
 	   return ''	
         data=''
-	# matrix or scalar
+	attr_num=self._num_matrix(attr)
+	# matrix or scalar or cell array
         if type(attr) == numpy.ndarray:
-	# scalar	
+	    # scalar	
 	    if attr.shape==(1,1):
-		data=str(attr[0][0]) + '\n'
+		data=str(attr_num[0][0]) + '\n'
 	    elif attr.shape==(1,):
-		data=str(attr[0]) + '\n'   
-	# matrix
-	    else:		    
-		for i in attr:
+		data=str(attr_num[0]) + '\n'   
+	    # matrix
+	    elif len(attr.shape)==2:		   
+		for i in attr_num:
 		    for j in i:
-			if j==int(j):
-			    j=int(j)	
 			data+=' ' + str(j)
 		    data+='\n'
+	    # matrix (vector) or cell array	    
+	    elif len(attr.shape)==1:
+		# matrix
+		if attr_num!=None:
+		    print 'print data ', attr.shape   
+		    for i in attr_num:
+			data+=' ' + str(i) 
+		    data+='\n'	
+		else:	
+		# cell array
+		    for i in attr:
+			data+='# name: <cell-element>\n'
+			data+='# type: sq_string\n'
+			data+='# elements: 1\n'
+			data+='# length: ' + str(len(i)) + '\n'
+			data+=str(i) + '\n\n'
+
 	# sparse matrix
 	elif type(attr) == csc_matrix:
 	    count=0
