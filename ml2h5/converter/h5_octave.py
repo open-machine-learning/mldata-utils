@@ -137,9 +137,10 @@ class H5_OCTAVE(BaseHandler):
 
 	tmp_data=numpy.array(self._read_matrix(octf,col,row)).T
 	data=csc_matrix((tmp_data[2],(tmp_data[0]-1,tmp_data[1]-1)),shape=(col,row))
+
 	return data
 
-    def _read_matrix(self,octf,col,row):
+    def _read_matrix(self,octf,col,row,mtype='float'):
         """Returns the data of a matrix atribute in the octave file
 
         @param octf: octave file
@@ -154,29 +155,29 @@ class H5_OCTAVE(BaseHandler):
                 line=line[1:]
             sp=line[:-1].split(' ')
 
-            conv_sp=[]
-            try:
-                for i in sp:
-                    conv_sp.append(int(i))
-            except ValueError:
-                conv_sp=[]
-                try:
-                    for i in sp:
-                        conv_sp.append(float(i))
-                except ValueError:
-            	    conv_sp=[]
-                    conv_sp.append(sp)
+	    if mtype=='int':
+		conv_sp=[]
+		try:
+		    for i in sp:
+			conv_sp.append(int(i))
+		except ValueError:
+		    return None
+	    if mtype=='float':
+		conv_sp=[]
+		try:
+		    for i in sp:
+			conv_sp.append(float(i))
+		except ValueError:
+		    return None
 
             data.append(conv_sp)
 	    lpos=octf.tell()
             line = octf.readline()
 	octf.seek(lpos)
 	out =  numpy.array(data)
-#	out.shape=(row,col)
 	if out.shape[0]==1:
 	    out.shape=(out.shape[1],)	
 
-	print 'read data', out.shape, len(data),':' , len(data[0])
 	return out
 
     def read(self):
@@ -228,11 +229,12 @@ class H5_OCTAVE(BaseHandler):
 			raise ValueError    
 		    out.append(int(i))	
 	    	except:
-		    try:    
+		    try:   
+			    
 			out.append(float(i))
 		    except:
 			return None	
-	else:
+	elif len(m.shape) == 2:
 	    out=[]    
 	    for i in m:
 		row=[]	
@@ -247,6 +249,8 @@ class H5_OCTAVE(BaseHandler):
 			except:
 			    return None
 		out.append(row)   
+	else:
+	    return None		    
 	return out
 
 
@@ -268,19 +272,23 @@ class H5_OCTAVE(BaseHandler):
 		else:    
         	    meta+='# type: matrix\n'
 		    try:
-			meta+='# rows: ' + str(attr.shape[1]) + '\n'
+			meta+='# rows: ' + str(attr.shape[0]) + '\n'
 		    except IndexError:
 			meta+='# rows: 1\n' 
 		    try:
-			meta+='# columns: ' + str(attr.shape[0]) + '\n'
+			meta+='# columns: ' + str(attr.shape[1]) + '\n'
 		    except IndexError:
 			meta+='# columns: 1\n'
 
 	    else:
         	meta+='# type: matrix\n'
-        	meta+='# rows: ' + str(attr.shape[1]) + '\n'
 		try:
-		    meta+='# columns: ' + str(attr.shape[0]) + '\n'
+        	    meta+='# rows: ' + str(attr.shape[0]) + '\n'
+		except IndexError:
+        	    meta+='# rows: 1\n'
+			
+		try:
+		    meta+='# columns: ' + str(attr.shape[1]) + '\n'
 		except IndexError:
 		    meta+='# columns: 1\n'
 
@@ -315,7 +323,7 @@ class H5_OCTAVE(BaseHandler):
 	    elif attr.shape==(1,):
 		data=str(attr_num[0]) + '\n'   
 	    # matrix
-	    elif len(attr.shape)==2:		   
+	    elif len(attr.shape)==2:
 		for i in attr_num:
 		    for j in i:
 			data+=' ' + str(j)
@@ -324,7 +332,6 @@ class H5_OCTAVE(BaseHandler):
 	    elif len(attr.shape)==1:
 		# matrix
 		if attr_num!=None:
-		    print 'print data ', attr.shape   
 		    for i in attr_num:
 			data+=' ' + str(i) 
 		    data+='\n'	
