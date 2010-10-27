@@ -75,10 +75,7 @@ class BaseHandler(object):
         for i in xrange(l):
             line=[]
             for o in data['ordering']:
-                try:
-                    line.extend(data['data'][o][i])
-                except:
-                    line.append(data['data'][o][i])
+                line.extend(data['data'][o][i])
             dl.append(line)
         return dl
 

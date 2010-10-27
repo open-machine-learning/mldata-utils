@@ -1,4 +1,5 @@
 import h5py
+import os.path
 from ml2h5.converter.basehandler import ALLOWED_SEPERATORS
 from ml2h5.converter import AUTODETECTION_MAXBUFLEN
 
@@ -168,7 +169,7 @@ def get_filename(orig):
     @return: HDF5-ified filename
     @rtype: string
     """
-    return orig + '.h5'
+    return os.path.splitext(orig)[0] + '.h5'
 
 
 

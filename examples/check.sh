@@ -1,11 +1,13 @@
 #!/bin/bash
 
 set -e
-for d in auto-mpg.uci.h5 diabetes_scale.libsvm.h5 friedman-datasets-fri_c2_100_50.arff.h5 iris.libsvm.h5.csv auto-mpg.uci.h5 
+#for d in ripley.libsvm iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5 auto-mpg.uci.h5 
+for d in iris.libsvm.h5.csv auto-mpg.uci.h5 friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5
 do
 	echo -n "checking data set $d"
-	for type in .oct #.libsvm #.csv .arff .libsvm .arff .oct .mat
+	for type in .csv .oct .arff #.oct #.libsvm #.csv .arff .libsvm .arff .oct .mat
 	do
+		echo
 		echo -n " $type "
 
 		echo -n 1..

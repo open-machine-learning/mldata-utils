@@ -128,9 +128,12 @@ class H5_LibSVM(BaseHandler):
         if self.is_multilabel:
             label = csc_matrix(
                 (numpy.array(data_lab), numpy.array(indices_lab), numpy.array(indptr_lab))
-            ).todense().T.tolist()
+            ).todense()
         else:
-            label = numpy.matrix(label).tolist()
+            label = numpy.matrix(label)
+
+        import pdb
+        pdb.set_trace()
 
         return (
             csc_matrix(
@@ -146,39 +149,24 @@ class H5_LibSVM(BaseHandler):
 
     def read(self):
         (A, label) = self._get_parsed_data()
-        data = {}
+        data = { 'label' : label }
+
         if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
-            data['indices'] = A.indices
-            data['indptr'] = A.indptr
-            data['data'] = A.data
-            ordering = ['label', 'indices', 'indptr', 'data']
+            data['data_indices'] = A.indices
+            data['data_indptr'] = A.indptr
+            data['data_data'] = A.data
         else: # dense
             data['data'] = A.todense()
-            ordering = ['label', 'data']
 
-#        names = []
-#        for i in xrange(A.shape[0]):
-#            try:
-#                row = A.todense()[i].tolist()[0]
-#            except AttributeError: # isn't sparse
-#                row = A[i].tolist()[0]
-#
-#            dtype = self.get_datatype(row)
-#            if dtype == numpy.int32:
-#                pre = 'int'
-#            elif dtype == numpy.double:
-#                pre = 'double'
-#            else:
-#                pre = 'str'
-#            names.append(pre + str(i))
+        import pdb
+        pdb.set_trace()
 
         return {
             'name': self.get_name(),
             'comment': 'LibSVM',
-            'ordering': ordering,
-            'names': copy.copy(ordering),
+            'ordering': ['label', 'data'],
+            'names': ['label', 'data'],
             'data': data,
-            'label': label,
         }
 
 
@@ -187,6 +175,8 @@ class H5_LibSVM(BaseHandler):
         libsvm = open(self.fname, 'w')
 
         if 'label' in data.keys():
+            import pdb
+            pdb.set_trace()
             if len(data['data']['label'][0]) == 1:
                 is_multilabel = False
             else:
@@ -194,7 +184,7 @@ class H5_LibSVM(BaseHandler):
 
         lengths=dict()
         for o in data['ordering']:
-            x=data['data'][o]
+            x=numpy.array(data['data'][o])
             if numpy.issubdtype(x.dtype, numpy.int):
                 data['data'][o]=x.astype(numpy.float64)
             try:
@@ -202,9 +192,13 @@ class H5_LibSVM(BaseHandler):
             except AttributeError:
                 lengths[o]=len(data['data'][o])
         l=set(lengths.values())
+        import pdb
+        pdb.set_trace()
         assert(len(l)==1)
         l=l.pop()
 
+        import pdb
+        pdb.set_trace()
         for i in xrange(l):
             out = []
             for o in data['ordering']:
