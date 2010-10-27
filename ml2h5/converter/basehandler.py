@@ -65,8 +65,8 @@ class BaseHandler(object):
             if numpy.issubdtype(x.dtype, numpy.int):
                 data['data'][o]=x.astype(numpy.float64)
             try:
-                lengths[o]=data['data'][o].shape[0]
-            except AttributeError:
+                lengths[o]=data['data'][o].shape[1]
+            except (AttributeError, IndexError):
                 lengths[o]=len(data['data'][o])
         l=set(lengths.values())
         assert(len(l)==1)
@@ -75,7 +75,10 @@ class BaseHandler(object):
         for i in xrange(l):
             line=[]
             for o in data['ordering']:
-                line.append(data['data'][o][i])
+                try:
+                    line.extend(data['data'][o][:,i])
+                except:
+                    line.append(data['data'][o][i])
             dl.append(line)
         return dl
 

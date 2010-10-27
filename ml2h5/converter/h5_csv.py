@@ -83,8 +83,8 @@ class H5_CSV(BaseHandler):
         lengths=dict()
         for o in data['ordering']:
             try:
-                lengths[o]=data['data'][o].shape[0]
-            except AttributeError:
+                lengths[o]=data['data'][o].shape[1]
+            except (AttributeError, IndexError):
                 lengths[o]=len(data['data'][o])
         l=set(lengths.values())
         assert(len(l)==1)
@@ -95,7 +95,7 @@ class H5_CSV(BaseHandler):
             line=[]
             for o in data['ordering']:
                 try:
-                    line.extend(map(str, data['data'][o][i]))
+                    line.extend(map(str, data['data'][o][:,i]))
                 except:
                     line.append(str(data['data'][o][i]))
             csv.write(self.seperator.join(line) + "\n")
