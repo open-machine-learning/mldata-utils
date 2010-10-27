@@ -174,7 +174,7 @@ class BaseHandler(object):
                 contents['data'][name] = csc_matrix((h5[vname], h5[sp_indices], h5[sp_indptr])
             )
             else:
-                contents['data'][name] = numpy.array(h5[vname],order='F').T
+                contents['data'][name] = numpy.array(h5[vname],order='F')
 
         h5.close()
         return contents
@@ -244,7 +244,6 @@ class BaseHandler(object):
         """
         # we want the exception handled elsewhere
         h5 = h5py.File(self.fname, 'w')
-
         h5.attrs['name'] = data['name']
         h5.attrs['mldata'] = VERSION_MLDATA
         h5.attrs['comment'] = data['comment']
@@ -257,7 +256,6 @@ class BaseHandler(object):
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():
                 group.create_dataset(path, data=val, compression=COMPRESSION)
-
             group = h5.create_group('/data_descr')
             names = numpy.array(data['names']).astype(self.str_type)
             if names.size > 0: # simple 'if names' throws exception if array
