@@ -54,14 +54,24 @@ class BaseHandler(object):
         return
         print 'WARNING: ' + msg
 
-    def convert_sparse(self, spmatrix):
-        A=spmatrix
-        if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
-            data['data_indices'] = A.indices
-            data['data_indptr'] = A.indptr
-            data['data_data'] = A.data
+    def _convert_to_ndarray(self,path,val):
+        """converts a attribut to a set of ndarrays depending on the datatype  
+
+        @param path: path of the attribute in the h5 file
+        @type path: string 
+        @param val: data of the attribute
+        @type val: csc_matrix/ndarray  
+        @rtype: list of ndarrays 
+        """
+        A=val
+        out=[]
+        if type(A)==csc_matrix: # sparse
+            out.append((path+'_indices', A.indices))
+            out.append((path+'_indptr', A.indptr))
+            out.append((path, A.data))
         else: # dense
-            data['data'] = A.todense()
+            out.append((path, numpy.array(A)))
+        return out     
 
     def get_data_as_list(self,data):
         """ this needs to `transpose' the data """
@@ -264,7 +274,9 @@ class BaseHandler(object):
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():
-                group.create_dataset(path, data=val, compression=COMPRESSION)
+                for path, val in self._convert_to_ndarray(path,val):
+                    group.create_dataset(path, data=val, compression=COMPRESSION)
+
             group = h5.create_group('/data_descr')
             names = numpy.array(data['names']).astype(self.str_type)
             if names.size > 0: # simple 'if names' throws exception if array

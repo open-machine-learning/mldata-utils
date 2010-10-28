@@ -261,7 +261,10 @@ class H5_OCTAVE(BaseHandler):
         attr_num=self._num_matrix(attr)
         meta='# name: ' + str(name) + '\n'
         if type(attr) == numpy.ndarray:
-            if attr.shape ==(1,1) or attr.shape==(1,):
+            if attr.shape ==():
+                meta+='# type: sq_string\n'
+                meta+='# elements: 1\n'
+            elif attr.shape ==(1,1) or attr.shape==(1,):
                 meta+='# type: scalar\n'
             elif len(attr.shape)==1:
                 if attr_num==None:
@@ -316,8 +319,12 @@ class H5_OCTAVE(BaseHandler):
         attr_num=self._num_matrix(attr)
         # matrix or scalar or cell array
         if type(attr) == numpy.ndarray:
+            # sq_string
+            if attr.shape==():
+                data= '# length: ' + str(len(str(attr))) + '\n'
+                data+=str(attr) + '\n\n'
             # scalar
-            if attr.shape==(1,1):
+            elif attr.shape==(1,1):
                 data=str(attr_num[0][0]) + '\n'
             elif attr.shape==(1,):
                 data=str(attr_num[0]) + '\n'
@@ -345,10 +352,11 @@ class H5_OCTAVE(BaseHandler):
 
         # sparse matrix
         elif type(attr) == csc_matrix:
+            attr_num=self._num_matrix(attr.data)
             count=0
             indices=attr.nonzero()
             for i in range(len(attr.data)):
-                data+=str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(attr.data[i])
+                data+=str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(attr_num[i])
                 data+='\n'
         # cell array
         elif type(attr) == list:
