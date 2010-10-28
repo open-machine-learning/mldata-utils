@@ -135,8 +135,7 @@ class H5_OCTAVE(BaseHandler):
         """
 
         tmp_data=numpy.array(self._read_matrix(octf,col,row)).T
-        print tmp_data
-        data=csc_matrix((tmp_data[2],(tmp_data[0]-1,tmp_data[1]-1)),shape=(col,row))
+        data=csc_matrix((tmp_data[2],(tmp_data[0]-1,tmp_data[1]-1)),shape=(row,col))
 
         return data
 
@@ -310,7 +309,6 @@ class H5_OCTAVE(BaseHandler):
 
         @return data: string of attr content
         """
-        print type(attr)
         if attr==None:
             return ''
         data=''
