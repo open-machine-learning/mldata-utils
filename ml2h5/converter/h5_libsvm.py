@@ -19,6 +19,14 @@ class H5_LibSVM(BaseHandler):
         self.label_maxidx = 0
         self.is_multilabel = False
 
+    #def convert_sparse(self, spmatrix):
+    #    A=spmatrix
+    #    if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
+    #        data['data_indices'] = A.indices
+    #        data['data_indptr'] = A.indptr
+    #        data['data_data'] = A.data
+    #    else: # dense
+    #        data['data'] = A.todense()
 
     def _scrub_labels(self, label):
         """Convert labels to doubles and determine max index
@@ -85,6 +93,8 @@ class H5_LibSVM(BaseHandler):
                 else:
                     val.append(c)
 
+        #import pdb
+        #pdb.set_trace()
         return {'label':label, 'variables':variables}
 
 
@@ -117,7 +127,7 @@ class H5_LibSVM(BaseHandler):
                     ptr_lab += 1
                 indptr_lab.append(ptr_lab)
             else: # only single label -> value is actual value
-                label.append(parsed[i]['label'])
+                label.append(parsed[i]['label'][0])
 
             for v in parsed[i]['variables']:
                 indices_var.append(int(v[0]) - 1) # -1: (multi)label idx
@@ -130,8 +140,10 @@ class H5_LibSVM(BaseHandler):
                 (numpy.array(data_lab), numpy.array(indices_lab), numpy.array(indptr_lab))
             ).todense()
         else:
-            label = numpy.matrix(label)
+            label = numpy.array(label)
 
+        import pdb
+        pdb.set_trace()
         return (
             csc_matrix(
                 (numpy.array(data_var), numpy.array(indices_var), numpy.array(indptr_var))
@@ -197,9 +209,9 @@ class H5_LibSVM(BaseHandler):
                     for j in xrange(len(d[i])):
                         out.append(str(j+1) + ':' + str(d[i][j]))
                         #try:
-                        #	line.extend(map(str, d[:,i]))
+                        #  line.extend(map(str, d[:,i]))
                         #except:
-                        #	line.append(str(d[i]))
+                        #  line.append(str(d[i]))
             libsvm.write(" ".join(out) + "\n")
 
         libsvm.close()
