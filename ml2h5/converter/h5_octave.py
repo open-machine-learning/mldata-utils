@@ -134,8 +134,8 @@ class H5_OCTAVE(BaseHandler):
         @return data: csc_matrix
         """
 
-
         tmp_data=numpy.array(self._read_matrix(octf,col,row)).T
+        print tmp_data
         data=csc_matrix((tmp_data[2],(tmp_data[0]-1,tmp_data[1]-1)),shape=(col,row))
 
         return data
@@ -273,12 +273,9 @@ class H5_OCTAVE(BaseHandler):
                     meta+='# columns: ' + str(len(attr)) + '\n'
                 else:
                     meta+='# type: matrix\n'
+                    meta+='# rows: 1\n'
                     try:
-                        meta+='# rows: ' + str(attr.shape[0]) + '\n'
-                    except IndexError:
-                        meta+='# rows: 1\n'
-                    try:
-                        meta+='# columns: ' + str(attr.shape[1]) + '\n'
+                        meta+='# columns: ' + str(attr.shape[0]) + '\n'
                     except IndexError:
                         meta+='# columns: 1\n'
 
@@ -313,6 +310,7 @@ class H5_OCTAVE(BaseHandler):
 
         @return data: string of attr content
         """
+        print type(attr)
         if attr==None:
             return ''
         data=''
