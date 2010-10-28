@@ -132,9 +132,6 @@ class H5_LibSVM(BaseHandler):
         else:
             label = numpy.matrix(label)
 
-        import pdb
-        pdb.set_trace()
-
         return (
             csc_matrix(
                 (numpy.array(data_var), numpy.array(indices_var), numpy.array(indptr_var))
@@ -149,17 +146,7 @@ class H5_LibSVM(BaseHandler):
 
     def read(self):
         (A, label) = self._get_parsed_data()
-        data = { 'label' : label }
-
-        if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
-            data['data_indices'] = A.indices
-            data['data_indptr'] = A.indptr
-            data['data_data'] = A.data
-        else: # dense
-            data['data'] = A.todense()
-
-        import pdb
-        pdb.set_trace()
+        data = { 'label' : label, 'data' : A}
 
         return {
             'name': self.get_name(),
@@ -175,8 +162,6 @@ class H5_LibSVM(BaseHandler):
         libsvm = open(self.fname, 'w')
 
         if 'label' in data.keys():
-            import pdb
-            pdb.set_trace()
             if len(data['data']['label'][0]) == 1:
                 is_multilabel = False
             else:
@@ -188,17 +173,13 @@ class H5_LibSVM(BaseHandler):
             if numpy.issubdtype(x.dtype, numpy.int):
                 data['data'][o]=x.astype(numpy.float64)
             try:
-                lengths[o]=data['data'][o].shape[0]
-            except AttributeError:
+                lengths[o]=data['data'][o].shape[1]
+            except (AttributeError, IndexError):
                 lengths[o]=len(data['data'][o])
         l=set(lengths.values())
-        import pdb
-        pdb.set_trace()
         assert(len(l)==1)
         l=l.pop()
 
-        import pdb
-        pdb.set_trace()
         for i in xrange(l):
             out = []
             for o in data['ordering']:
@@ -212,9 +193,13 @@ class H5_LibSVM(BaseHandler):
                         out.append(','.join(labels))
                     else:
                         out.append(str(data['label'][i][0]))
-
-            for j in xrange(len(d[i])):
-                out.append(str(j+1) + ':' + str(d[i][j]))
+                else:
+                    for j in xrange(len(d[i])):
+                        out.append(str(j+1) + ':' + str(d[i][j]))
+                        #try:
+                        #	line.extend(map(str, d[:,i]))
+                        #except:
+                        #	line.append(str(d[i]))
             libsvm.write(" ".join(out) + "\n")
 
         libsvm.close()

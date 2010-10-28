@@ -54,6 +54,15 @@ class BaseHandler(object):
         return
         print 'WARNING: ' + msg
 
+    def convert_sparse(self, spmatrix):
+        A=spmatrix
+        if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
+            data['data_indices'] = A.indices
+            data['data_indptr'] = A.indptr
+            data['data_data'] = A.data
+        else: # dense
+            data['data'] = A.todense()
+
     def get_data_as_list(self,data):
         """ this needs to `transpose' the data """
 
