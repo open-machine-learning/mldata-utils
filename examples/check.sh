@@ -4,7 +4,7 @@ set -e
 for d in ripley.libsvm iris.libsvm.h5.csv auto-mpg.uci.h5 friedman-datasets-fri_c2_100_50.arff friedman-datasets-fri_c2_100_50.arff.h5 
 do
 	echo -n "checking data set $d"
-	for type in .csv #.oct .csv .arff #.libsvm .mat
+	for type in .oct .csv .arff #.libsvm .mat
 	do
 		echo
 		echo -n " $type "

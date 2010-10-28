@@ -1,7 +1,7 @@
 import numpy, h5py, os, copy
 from scipy.sparse import csc_matrix
 from basehandler import BaseHandler
-
+import ml2h5.converter
 
 
 class H5_LibSVM(BaseHandler):
@@ -33,7 +33,6 @@ class H5_LibSVM(BaseHandler):
         @return: compressed sparse column matrix + labels
         @rtype: list of scipy.sparse.csc_matrix and label tuple/2-d tuple (multilabel)
         """
-        print "start"
         indices_var = []
         indptr_var = [0]
         ptr_var = 0
@@ -51,7 +50,7 @@ class H5_LibSVM(BaseHandler):
             lab=items[0]
             dat=items[1:]
 
-            lab=[int(i) for i in lab.split(',')]
+            lab=[int(float(i)) for i in lab.split(',')]
 
             if len(lab)>1:
                 self.is_multilabel = True
@@ -81,7 +80,6 @@ class H5_LibSVM(BaseHandler):
         data = csc_matrix( (numpy.array(data_var), numpy.array(indices_var),
             numpy.array(indptr_var)) )
 
-        print "done"
         return {
             'name': self.get_name(),
             'comment': 'LibSVM',
@@ -92,20 +90,23 @@ class H5_LibSVM(BaseHandler):
 
 
     def write(self, data):
-        """ this needs to `transpose' the data """
+        names=('label','data')
+        if not set(data['data'].keys()).issubset(set(names)):
+            raise ml2h5.converter.ConversionError('libsvm format needs data or label')
+
+        if type(data['data']['data']) != csc_matrix:
+            raise ml2h5.converter.ConversionError('libsvm format needs csc_matrix data')
+
         libsvm = open(self.fname, 'w')
 
-        if 'label' in data.keys():
-            if len(data['data']['label'][0]) == 1:
-                is_multilabel = False
+        if 'label' in data['data'].keys():
+            if type(data['data']['label']) == csc_matrix:
+                self.is_multilabel = True
             else:
-                is_multilabel = True
+                self.is_multilabel = False
 
         lengths=dict()
-        for o in data['ordering']:
-            x=numpy.array(data['data'][o])
-            if numpy.issubdtype(x.dtype, numpy.int):
-                data['data'][o]=x.astype(numpy.float64)
+        for o in names:
             try:
                 lengths[o]=data['data'][o].shape[1]
             except (AttributeError, IndexError):
@@ -116,24 +117,26 @@ class H5_LibSVM(BaseHandler):
 
         for i in xrange(l):
             out = []
-            for o in data['ordering']:
+            for o in names:
                 d=data['data'][o]
                 if o == 'label':
-                    if is_multilabel:
+                    if self.is_multilabel:
                         labels = []
-                        for j in xrange(len(d[i])):
-                            if d[i][j] == 1:
-                                labels.append(str(j))
+                        indptr=d.indptr
+                        indices=d.indices
+                        dat=d.data
+                        for j in xrange(indptr[i],indptr[i+1]):
+                            labels.append(str(indices[j]+1))
+
                         out.append(','.join(labels))
                     else:
-                        out.append(str(data['label'][i][0]))
+                        out.append(str(d[i]))
                 else:
-                    for j in xrange(len(d[i])):
-                        out.append(str(j+1) + ':' + str(d[i][j]))
-                        #try:
-                        #  line.extend(map(str, d[:,i]))
-                        #except:
-                        #  line.append(str(d[i]))
+                    indptr=d.indptr
+                    indices=d.indices
+                    dat=d.data
+                    for j in xrange(indptr[i],indptr[i+1]):
+                        out.append(str(indices[j]+1) + ':' + str(dat[j]))
             libsvm.write(" ".join(out) + "\n")
 
         libsvm.close()

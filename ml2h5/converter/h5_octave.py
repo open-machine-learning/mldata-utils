@@ -1,6 +1,7 @@
 import h5py, numpy
 from basehandler import BaseHandler
 from scipy.sparse import csc_matrix
+import ml2h5.converter
 
 class H5_OCTAVE(BaseHandler):
     """Handle Octave files."""
@@ -186,7 +187,7 @@ class H5_OCTAVE(BaseHandler):
 
         # header check
         if not self._check_header(octf):
-            raise ConversionError('Header check failed')
+            raise ml2h5.converter.ConversionError('Header check failed')
 
         attr=self._next_attr(octf)
         while attr and attr['name']!='':
@@ -196,7 +197,7 @@ class H5_OCTAVE(BaseHandler):
             attr=self._next_attr(octf)
 
         if (data.keys==[]):
-            raise ConversionError('empty conversion')
+            raise ml2h5.converter.ConversionError('empty conversion')
 
         return {
             'name': self.get_name(),
