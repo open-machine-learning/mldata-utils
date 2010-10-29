@@ -1,6 +1,8 @@
 import h5py, numpy, copy
 import arff
 from basehandler import BaseHandler
+from scipy.sparse import csc_matrix
+import ml2h5.converter
 
 
 class H5_ARFF(BaseHandler):
@@ -63,10 +65,21 @@ class H5_ARFF(BaseHandler):
             'data':data,
         }
 
+    def check_sparse(self, data):
+        for k in data.keys():
+            d=data[k]
+        if type(d)==csc_matrix:
+            raise ml2h5.converter.ConversionError("Sparse matrices are not supported in ARFF files")
+
     def write(self, data):
+        self.check_sparse(data['data'])
+
         af = arff.ArffFile()
         af.data = self.get_data_as_list(data)
-        af.attributes = data['names']
+        if data.has_key('names') and len(data['names']):
+            af.attributes = data['names']
+        else:
+            af.attributes = data['ordering']
         af.relation = data['name']
         af.comment = data['comment']
 

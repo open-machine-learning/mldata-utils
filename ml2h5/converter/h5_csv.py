@@ -1,6 +1,7 @@
 import numpy, h5py, os, copy, numpy
 from scipy.sparse import csc_matrix
 from basehandler import BaseHandler
+import ml2h5.converter
 
 COMMENT = '# '
 SEPERATOR = ','
@@ -94,10 +95,19 @@ class H5_CSV(BaseHandler):
         for i in xrange(l):
             line=[]
             for o in data['ordering']:
+                d=data['data'][o]
+                if type(d)==csc_matrix:
+                    raise ml2h5.converter.ConversionError("Sparse matrices are not supported in CSV files")
                 try:
-                    line.extend(map(str, data['data'][o][:,i]))
+                    line.extend(map(str, d[:,i]))
                 except:
-                    line.append(str(data['data'][o][i]))
+                    try:
+                        if len(d[i]):
+                            line.append(str(d[i]))
+                        else:
+                            line.append('')
+                    except TypeError:
+                        line.append(str(d[i]))
             csv.write(self.seperator.join(line) + "\n")
         csv.close()
 

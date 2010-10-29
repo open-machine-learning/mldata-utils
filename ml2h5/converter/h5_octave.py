@@ -348,12 +348,23 @@ class H5_OCTAVE(BaseHandler):
 
         # sparse matrix
         elif type(attr) == csc_matrix:
-            attr_num=self._num_matrix(attr.data)
-            count=0
-            indices=attr.nonzero()
-            for i in range(len(attr.data)):
-                of.write(str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(attr_num[i]))
-                of.write('\n')
+            dat=self._num_matrix(attr.data)
+            indptr=attr.indptr
+            indices=attr.indices
+
+            for i in xrange(attr.shape[1]):
+                out=[]
+                for j in xrange(indptr[i],indptr[i+1]):
+                    if dat[j]==int:
+                        out.append("%d %d %d\n" % (indices[j]+1, i+1, dat[j]))
+                    else:
+                        out.append("%d %d %.12g\n" % (indices[j]+1, i+1, dat[j]))
+                of.write(''.join(out))
+
+            # more clean but slower code
+            #indices=attr.nonzero()
+            #for i in range(len(attr.data)):
+            #    of.write(str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(dat[i]) + '\n')
         # cell array
         elif type(attr) == list:
             for i in attr:

@@ -23,7 +23,13 @@ class H5_MAT(BaseHandler):
 
         for k in matf.keys():
             if matf[k].dtype == numpy.object: # asume cell of strings
-                cell = [unicode(i[0]) for i in matf[k][0]]
+
+                cell = []
+                for i in matf[k][0]:
+                    if len(i[0]):
+                        cell.append(unicode(i[0]))
+                    else:
+                        cell.append(u'')
                 matf[k]=cell
 
         data = matf

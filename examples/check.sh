@@ -1,10 +1,10 @@
 #!/bin/bash
-#auto-mpg.uci.h5 
+
 set -e
-for d in iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff friedman-datasets-fri_c2_100_50.arff.h5 
+for d in friedman-datasets-fri_c2_100_50.arff iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5 
 do
 	echo -n "checking data set $d"
-	for type in .mat #.oct .csv .arff .mat
+	for type in .oct .csv .mat #.arff 
 	do
 		echo
 		echo -n " $type "

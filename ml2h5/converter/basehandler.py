@@ -150,8 +150,9 @@ class BaseHandler(object):
         @rtype: dict of: list of names, list of ordering and dict of examples
         """
         # we want the exception handled elsewhere
+
         h5 = h5py.File(self.fname, 'r')
-            
+
         contents = {
             'ordering': h5['/data_descr/ordering'][...].tolist(),
             'name': h5.attrs['name'],
@@ -175,7 +176,20 @@ class BaseHandler(object):
                 contents['data'][name] = csc_matrix((h5[vname], h5[sp_indices], h5[sp_indptr])
             )
             else:
-                contents['data'][name] = numpy.array(h5[vname],order='F')
+                d = numpy.array(h5[vname],order='F')
+
+                try:
+                    x=d['vlen']
+                    cell=[]
+                    for i in x:
+                        if len(i):
+                            cell.append(unicode(i))
+                        else:
+                            cell.append(u'')
+                    d=cell
+                except:
+                    pass
+                contents['data'][name] = d
 
         h5.close()
         return contents
