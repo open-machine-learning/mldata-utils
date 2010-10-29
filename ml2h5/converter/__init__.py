@@ -115,6 +115,8 @@ class Converter(object):
 
         try:
             data = self.handler_in.read()
+            #import pdb
+            #pdb.set_trace()
             self.handler_out.write(data)
             if verify:
                 self.verify()

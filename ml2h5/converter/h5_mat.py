@@ -23,13 +23,12 @@ class H5_MAT(BaseHandler):
 
         for k in matf.keys():
             if matf[k].dtype == numpy.object: # asume cell of strings
-
                 cell = []
                 for i in matf[k][0]:
                     if len(i[0]):
-                        cell.append(unicode(i[0]))
+                        cell.append(str(i[0]))
                     else:
-                        cell.append(u'')
+                        cell.append('')
                 matf[k]=cell
 
         data = matf
@@ -62,6 +61,11 @@ class H5_MAT(BaseHandler):
         for k in d.keys():
             if type(d[k])==list and len(d[k])>0 and type(d[k][0])==str:
                 cell = array([ numpy.array(unicode(i)) for i in d[k] ], dtype=numpy.object)
+                d[k] = cell
+            elif type(d[k])==numpy.ndarray and len(d[k])>0 and type(d[k][0])==str:
+                cell = numpy.empty((1,len(d[k])), dtype=numpy.object)
+                for i in xrange(len(d[k])):
+                    cell[0,i]=numpy.array(unicode(d[k][i]), dtype='U')
                 d[k] = cell
             elif type(d[k])==numpy.ndarray and len(d[k])>0 and d[k][0].dtype == numpy.object:
                 cell = numpy.empty((1,len(d[k])), dtype=numpy.object)

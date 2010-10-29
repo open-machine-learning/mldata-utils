@@ -65,10 +65,14 @@ class BaseHandler(object):
         """
         A=val
         out=[]
+        dt = h5py.special_dtype(vlen=str)
+
         if type(A)==csc_matrix: # sparse
             out.append((path+'_indices', A.indices))
             out.append((path+'_indptr', A.indptr))
             out.append((path, A.data))
+        elif type(A)==list and len(A)>0 and type(A[0])==str:
+            out.append((path, numpy.array(A, dtype=dt)))
         else: # dense
             out.append((path, numpy.array(A)))
         return out
@@ -179,14 +183,16 @@ class BaseHandler(object):
                 d = numpy.array(h5[vname],order='F')
 
                 try:
-                    x=d['vlen']
-                    cell=[]
-                    for i in x:
-                        if len(i):
-                            cell.append(unicode(i))
-                        else:
-                            cell.append(u'')
-                    d=cell
+                    d=d['vlen']
+                    #x=d['vlen']
+                    #cell=[]
+                    #for i in x:
+                    #    if len(i):
+                    #        cell.append(unicode(i))
+                    #    else:
+                    #        cell.append(u'')
+                    #d=cell
+                    #d=x
                 except:
                     pass
                 contents['data'][name] = d
