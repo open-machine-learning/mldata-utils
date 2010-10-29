@@ -150,7 +150,7 @@ class ArffFile(object):
             for e, a in zip(d, self.attributes):
                 at = self.attribute_types[a]
                 if at == 'numeric':
-                    line.append(str(e))
+                    line.append(str(float(e)))
                 elif at == 'string':
                     line.append(self.esc(e))
                 elif at == 'date':

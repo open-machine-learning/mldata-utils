@@ -57,7 +57,7 @@ class H5_LibSVM(BaseHandler):
 
             if self.is_multilabel:
                 for idx in lab:
-                    indices_lab.append(int(idx))
+                    indices_lab.append(idx)
                     data_lab.append(1.)
                     ptr_lab += 1
                 indptr_lab.append(ptr_lab)
@@ -72,8 +72,11 @@ class H5_LibSVM(BaseHandler):
             indptr_var.append(ptr_var)
 
         if self.is_multilabel:
-            label = csc_matrix( (numpy.array(data_lab), numpy.array(indices_lab),
-                    numpy.array(indptr_lab)) )
+            data_lab=numpy.array(data_lab)
+            indices_lab=numpy.array(indices_lab)
+            indptr_lab=numpy.array(indptr_lab)
+            label = csc_matrix( (data_lab, indices_lab, indptr_lab)  )
+            label.sort_indices()
         else:
             label = numpy.array(label)
 
@@ -129,7 +132,7 @@ class H5_LibSVM(BaseHandler):
                         indices=d.indices
                         dat=d.data
                         for j in xrange(indptr[i],indptr[i+1]):
-                            labels.append(str(indices[j]+1))
+                            labels.append(str(indices[j]))
 
                         out.append(','.join(labels))
                     else:
@@ -140,7 +143,10 @@ class H5_LibSVM(BaseHandler):
                         indices=d.indices
                         dat=d.data
                         for j in xrange(indptr[i],indptr[i+1]):
-                            out.append(str(indices[j]+1) + ':' + str(dat[j]))
+                            if dat[j]==int:
+                                out.append('%d:%d' % (indices[j]+1,dat[j]))
+                            else:
+                                out.append('%d:%.15g' % (indices[j]+1,dat[j]))
                     else: # dense
                         for j in xrange(len(d)):
                             out.append(str(j+1) + ':' + str(d[j,i]))

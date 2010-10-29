@@ -136,7 +136,8 @@ class H5_OCTAVE(BaseHandler):
         """
 
         tmp_data=numpy.array(self._read_matrix(octf,col,row)).T
-        data=csc_matrix((tmp_data[2],(tmp_data[0]-1,tmp_data[1]-1)),shape=(row,col))
+        data=csc_matrix((tmp_data[2],tmp_data[0:2]-1),shape=(row,col))
+        data.sort_indices()
 
         return data
 
@@ -358,7 +359,7 @@ class H5_OCTAVE(BaseHandler):
                     if dat[j]==int:
                         out.append("%d %d %d\n" % (indices[j]+1, i+1, dat[j]))
                     else:
-                        out.append("%d %d %.12g\n" % (indices[j]+1, i+1, dat[j]))
+                        out.append("%d %d %.15g\n" % (indices[j]+1, i+1, dat[j]))
                 of.write(''.join(out))
 
             # more clean but slower code
