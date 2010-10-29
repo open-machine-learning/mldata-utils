@@ -61,7 +61,7 @@ class BaseHandler(object):
         @type path: string 
         @param val: data of the attribute
         @type val: csc_matrix/ndarray  
-        @rtype: list of ndarrays 
+        @rtype: list of (string,ndarray) tuples 
         """
         A=val
         out=[]
@@ -151,6 +151,7 @@ class BaseHandler(object):
         """
         # we want the exception handled elsewhere
         h5 = h5py.File(self.fname, 'r')
+            
         contents = {
             'ordering': h5['/data_descr/ordering'][...].tolist(),
             'name': h5.attrs['name'],

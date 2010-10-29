@@ -161,14 +161,14 @@ class H5_OCTAVE(BaseHandler):
                     for i in sp:
                         conv_sp.append(int(i))
                 except ValueError:
-                    return None
+                    raise ConversionError('unexpected data type')    
             if mtype=='float':
                 conv_sp=[]
                 try:
                     for i in sp:
                         conv_sp.append(float(i))
                 except ValueError:
-                    return None
+                    raise ConversionError('unexpected data type')    
 
             data.append(conv_sp)
             lpos=octf.tell()
@@ -198,11 +198,10 @@ class H5_OCTAVE(BaseHandler):
 
         if (data.keys==[]):
             raise ml2h5.converter.ConversionError('empty conversion')
-
         return {
             'name': self.get_name(),
             'comment': 'octave',
-            'names':names,
+            'names':[],
             'ordering':names,
             'data':data,
         }
@@ -253,99 +252,99 @@ class H5_OCTAVE(BaseHandler):
         return out
 
 
-    def _print_meta(self,attr,name):
+    def _print_meta(self,of,attr,name):
         """Return a string of metainformation
 
         @return meta: string of attr informations
         """
         attr_num=self._num_matrix(attr)
-        meta='# name: ' + str(name) + '\n'
+        of.write('# name: ' + str(name) + '\n')
         if type(attr) == numpy.ndarray:
             if attr.shape ==():
-                meta+='# type: sq_string\n'
-                meta+='# elements: 1\n'
+                of.write('# type: sq_string\n')
+                of.write('# elements: 1\n')
             elif attr.shape ==(1,1) or attr.shape==(1,):
-                meta+='# type: scalar\n'
+                of.write('# type: scalar\n')
             elif len(attr.shape)==1:
                 if attr_num==None:
-                    meta+='# type: cell\n'
-                    meta+='# rows: 1\n'
-                    meta+='# columns: ' + str(len(attr)) + '\n'
+                    of.write('# type: cell\n')
+                    of.write('# rows: 1\n')
+                    of.write('# columns: ' + str(len(attr)) + '\n')
                 else:
-                    meta+='# type: matrix\n'
-                    meta+='# rows: 1\n'
+                    of.write('# type: matrix\n')
+                    of.write('# rows: 1\n')
                     try:
-                        meta+='# columns: ' + str(attr.shape[0]) + '\n'
+                        of.write('# columns: ' + str(attr.shape[0]) + '\n')
                     except IndexError:
-                        meta+='# columns: 1\n'
+                        of.write('# columns: 1\n')
 
             else:
-                meta+='# type: matrix\n'
+                of.write('# type: matrix\n')
                 try:
-                    meta+='# rows: ' + str(attr.shape[0]) + '\n'
+                    of.write('# rows: ' + str(attr.shape[0]) + '\n')
                 except IndexError:
-                    meta+='# rows: 1\n'
+                    of.write('# rows: 1\n')
 
                 try:
-                    meta+='# columns: ' + str(attr.shape[1]) + '\n'
+                    of.write('# columns: ' + str(attr.shape[1]) + '\n')
                 except IndexError:
-                    meta+='# columns: 1\n'
+                    of.write('# columns: 1\n')
 
         elif type(attr)== csc_matrix:
-            meta+='# type: sparse matrix\n'
-            meta+='# nnz: '+str(attr.nnz) + '\n'
-            meta+='# rows: '+str(attr.shape[0]) + '\n'
-            meta+='# columns: '+str(attr.shape[1]) + '\n'
+            of.write('# type: sparse matrix\n')
+            of.write('# nnz: '+str(attr.nnz) + '\n')
+            of.write('# rows: '+str(attr.shape[0]) + '\n')
+            of.write('# columns: '+str(attr.shape[1]) + '\n')
         elif type(attr) == list:
-            meta+='# type: cell\n'
-            meta+='# rows: 1\n'
-            meta+='# columns: ' + str(len(attr)) + '\n'
+            of.write('# type: cell\n')
+            of.write('# rows: 1\n')
+            of.write('# columns: ' + str(len(attr)) + '\n')
         else:
-            meta+='# type: sq_string\n'
-            meta+='# elements: 1\n'
-        return meta
+            of.write('# type: sq_string\n')
+            of.write('# elements: 1\n')
+        return True
 
-    def _print_data(self, attr):
+    def _print_data(self, of, attr):
         """Return a string of data
 
         @return data: string of attr content
         """
         if attr==None:
-            return ''
-        data=''
+            return False
+        
         attr_num=self._num_matrix(attr)
         # matrix or scalar or cell array
         if type(attr) == numpy.ndarray:
             # sq_string
             if attr.shape==():
-                data= '# length: ' + str(len(str(attr))) + '\n'
-                data+=str(attr) + '\n\n'
+                of.write('# length: ' + str(len(str(attr))) + '\n')
+                of.write(str(attr) + '\n\n')
             # scalar
             elif attr.shape==(1,1):
-                data=str(attr_num[0][0]) + '\n'
+                of.write(str(attr_num[0][0]) + '\n')
             elif attr.shape==(1,):
-                data=str(attr_num[0]) + '\n'
+                of.write(str(attr_num[0]) + '\n')
             # matrix
             elif len(attr.shape)==2:
                 for i in attr_num:
                     for j in i:
-                        data+=' ' + str(j)
-                    data+='\n'
+                        of.write(' ' + str(j))
+                    of.write('\n')
             # matrix (vector) or cell array
             elif len(attr.shape)==1:
                 # matrix
                 if attr_num!=None:
                     for i in attr_num:
-                        data+=' ' + str(i)
-                    data+='\n'
+                        of.write(' ' + str(i))
+                    of.write('\n')
                 else:
                     # cell array
                     for i in attr:
-                        data+='# name: <cell-element>\n'
-                        data+='# type: sq_string\n'
-                        data+='# elements: 1\n'
-                        data+='# length: ' + str(len(i)) + '\n'
-                        data+=str(i) + '\n\n'
+                        of.write('# name: <cell-element>\n')
+                        of.write('# type: sq_string\n')
+                        of.write('# elements: 1\n')
+                        of.write('# length: ' + str(len(i)) + '\n')
+                        of.write(str(i) + '\n\n')
 
         # sparse matrix
         elif type(attr) == csc_matrix:
@@ -353,31 +352,29 @@ class H5_OCTAVE(BaseHandler):
             count=0
             indices=attr.nonzero()
             for i in range(len(attr.data)):
-                data+=str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(attr_num[i])
-                data+='\n'
+                of.write(str(indices[0][i]+1) + ' '  + str(indices[1][i]+1) + ' ' + str(attr_num[i]))
+                of.write('\n')
         # cell array
         elif type(attr) == list:
             for i in attr:
-                data+='# name: <cell-element>\n'
-                data+='# type: sq_string\n'
-                data+='# elements: 1\n'
-                data+='# length: ' + str(len(i)) + '\n'
-                data+=str(i) + '\n\n'
+                of.write('# name: <cell-element>\n')
+                of.write('# type: sq_string\n')
+                of.write('# elements: 1\n')
+                of.write('# length: ' + str(len(i)) + '\n')
+                of.write(str(i) + '\n\n')
         # single string
         else:
-            data= '# length: ' + str(len(attr)) + '\n'
-            data+=str(attr) + '\n\n'
-        return data
-
+            of.write('# length: ' + str(len(attr)) + '\n')
+            of.write(str(attr) + '\n\n')
+        return True
 
 
     def write(self, data):
         of = open(self.fname,'w')
-        out = self._oct_header()
+        of.writelines(self._oct_header())
 
         for o in data['ordering']:
-            out += self._print_meta(data['data'][o], o)
-            out += self._print_data(data['data'][o])
+            self._print_meta(of,data['data'][o], o)
+            self._print_data(of,data['data'][o])
 
-        of.writelines(out)
         of.close()
