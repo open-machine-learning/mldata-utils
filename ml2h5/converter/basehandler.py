@@ -71,7 +71,7 @@ class BaseHandler(object):
             out.append((path, A.data))
         else: # dense
             out.append((path, numpy.array(A)))
-        return out     
+        return out
 
     def get_data_as_list(self,data):
         """ this needs to `transpose' the data """
@@ -219,6 +219,20 @@ class BaseHandler(object):
         merging = None
         for name in data['ordering']:
             val = data['data'][name]
+
+            if type(val) == csc_matrix:
+                merging = None
+                path = name
+                merged[path] = val
+                ordering.append(path)
+                continue
+
+            if name.endswith('_indices') or name.endswith('_indptr'):
+                merging = None
+                path = name
+                merged[path] = val
+                continue
+
             if len(val) < 1: continue
 
             t = type(val[0])
@@ -268,9 +282,7 @@ class BaseHandler(object):
         h5.attrs['comment'] = data['comment']
 
         try:
-            #import pdb
-            #pdb.set_trace()
-            #data = self._get_merged(data)
+            data = self._get_merged(data)
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():

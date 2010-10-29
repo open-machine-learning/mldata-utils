@@ -16,14 +16,14 @@ class H5_LibSVM(BaseHandler):
         super(H5_LibSVM, self).__init__(*args, **kwargs)
         self.is_multilabel = False
 
-    #def convert_sparse(self, spmatrix):
-    #    A=spmatrix
-    #    if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
-    #        data['data_indices'] = A.indices
-    #        data['data_indptr'] = A.indptr
-    #        data['data_data'] = A.data
-    #    else: # dense
-    #        data['data'] = A.todense()
+    def convert_sparse(self, spmatrix):
+        assert(type(spmatrix==csc_matrix))
+
+        A=spmatrix
+        if A.nnz/numpy.double(A.shape[0]*A.shape[1]) < 0.5: # sparse
+            return spmatrix
+
+        return numpy.array(A.todense())
 
     def get_comment(self):
         return 'LibSVM'
@@ -80,6 +80,8 @@ class H5_LibSVM(BaseHandler):
         data = csc_matrix( (numpy.array(data_var), numpy.array(indices_var),
             numpy.array(indptr_var)) )
 
+        data = self.convert_sparse(data)
+
         return {
             'name': self.get_name(),
             'comment': 'LibSVM',
@@ -94,8 +96,9 @@ class H5_LibSVM(BaseHandler):
         if not set(data['data'].keys()).issubset(set(names)):
             raise ml2h5.converter.ConversionError('libsvm format needs data or label')
 
-        if type(data['data']['data']) != csc_matrix:
-            raise ml2h5.converter.ConversionError('libsvm format needs csc_matrix data')
+        t = type(data['data']['data'])
+        if  t not in (csc_matrix, numpy.ndarray):
+            raise ml2h5.converter.ConversionError('libsvm format needs csc or dense matrix "data"')
 
         libsvm = open(self.fname, 'w')
 
@@ -131,12 +134,16 @@ class H5_LibSVM(BaseHandler):
                         out.append(','.join(labels))
                     else:
                         out.append(str(d[i]))
-                else:
-                    indptr=d.indptr
-                    indices=d.indices
-                    dat=d.data
-                    for j in xrange(indptr[i],indptr[i+1]):
-                        out.append(str(indices[j]+1) + ':' + str(dat[j]))
+                else: #data
+                    if type(d)==csc_matrix:
+                        indptr=d.indptr
+                        indices=d.indices
+                        dat=d.data
+                        for j in xrange(indptr[i],indptr[i+1]):
+                            out.append(str(indices[j]+1) + ':' + str(dat[j]))
+                    else: # dense
+                        for j in xrange(len(d)):
+                            out.append(str(j+1) + ':' + str(d[j,i]))
             libsvm.write(" ".join(out) + "\n")
 
         libsvm.close()
