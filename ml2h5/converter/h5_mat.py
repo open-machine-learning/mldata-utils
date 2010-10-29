@@ -29,6 +29,18 @@ class H5_MAT(BaseHandler):
         data = matf
         ordering = matf.keys()
 
+        def strip_type(x):
+            if x.startswith('double'):
+                return int(x[6:])
+            elif x.startswith('int'):
+                return int(x[3:])
+            elif x.startswith('str'):
+                return int(x[3:])
+            else:
+                return x
+
+        ordering.sort(cmp=lambda x,y: cmp(strip_type(x),strip_type(y)))
+
         return {
             'name': self.get_name(),
             'comment': 'matlab',

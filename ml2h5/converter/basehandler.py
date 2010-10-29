@@ -81,8 +81,8 @@ class BaseHandler(object):
         lengths=dict()
         for o in data['ordering']:
             x=data['data'][o]
-            if numpy.issubdtype(x.dtype, numpy.int):
-                data['data'][o]=x.astype(numpy.float64)
+            #if numpy.issubdtype(x.dtype, numpy.int):
+            #    data['data'][o]=x.astype(numpy.float64)
             try:
                 lengths[o]=data['data'][o].shape[1]
             except (AttributeError, IndexError):
@@ -100,27 +100,6 @@ class BaseHandler(object):
                     line.append(data['data'][o][i])
             dl.append(line)
         return dl
-
-    def _get_complex_data(self, h5):
-        """Get 'complex' data structure.
-
-        @param h5: HDF5 file
-        @type h5: File object
-        @return: blob of data
-        @rtype: list of lists
-        """
-        # de-merge
-        data = []
-        for name in h5['/data_descr/ordering']:
-            block = h5['/data/' + name][:]
-            if type(block[0])== numpy.ndarray:
-                for i in xrange(len(block)):
-                    data.append(block[i])
-            else:
-                data.append(block)
-
-        return numpy.matrix(data).T.tolist()
-
 
     def get_name(self):
         """Get dataset name from non-HDF5 file
@@ -173,13 +152,15 @@ class BaseHandler(object):
         # we want the exception handled elsewhere
         h5 = h5py.File(self.fname, 'r')
         contents = {
-            'names': h5['/data_descr/names'][...].tolist(),
             'ordering': h5['/data_descr/ordering'][...].tolist(),
             'name': h5.attrs['name'],
             'comment': h5.attrs['comment'],
             'mldata': h5.attrs['mldata'],
             'data': dict(),
         }
+
+        if 'names' in h5.keys():
+           contents['names']=h5['/data_descr/names'][...].tolist()
 
         if '/data_descr/types' in h5:
             contents['types'] = h5['/data_descr/types'][...]
@@ -282,7 +263,7 @@ class BaseHandler(object):
         h5.attrs['comment'] = data['comment']
 
         try:
-            data = self._get_merged(data)
+            #data = self._get_merged(data)
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():
