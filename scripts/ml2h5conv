@@ -89,9 +89,9 @@ def rm_opt(option, value=None):
 def parse_options():
     """Parse given options."""
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 's:vfi:o:',
+        opts, args = getopt.getopt(sys.argv[1:], 's:vfcim:o:',
             ['seperator=', 'verify', 'first-line-attribute-names',
-            'format-in=', 'format-out='])
+                'compression', 'merge', 'format-in=', 'format-out='])
     except getopt.GetoptError, err: # print help information and exit
         print str(err) + "\n"
         usage()

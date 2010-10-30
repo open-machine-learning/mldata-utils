@@ -6,8 +6,10 @@ This module heavily relies on the functionality required for http://mldata.org
 
 import os, h5py, numpy
 import ml2h5.data
-from . import VERSION_MLDATA, COMPRESSION
+from . import VERSION_MLDATA
 from indexsplit import reduce_split_str
+
+COMPRESSION = None
 
 def update_object(h5, name, value):
     if name in h5.keys():

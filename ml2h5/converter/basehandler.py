@@ -1,7 +1,7 @@
 import os, h5py, numpy
 from scipy.sparse import csc_matrix
 
-from ml2h5 import VERSION_MLDATA, COMPRESSION
+from ml2h5 import VERSION_MLDATA
 from ml2h5.converter import ALLOWED_SEPERATORS
 
 
@@ -22,7 +22,7 @@ class BaseHandler(object):
     str_type = h5py.new_vlen(numpy.str)
 
 
-    def __init__(self, fname, seperator=None):
+    def __init__(self, fname, seperator=None, compression=None, merge=True):
         """
         @param fname: name of in-file
         @type fname: string
@@ -30,7 +30,9 @@ class BaseHandler(object):
         @type seperator: string
         """
         self.fname = fname
+        self.compression = compression
         self.set_seperator(seperator)
+        self.merge = merge
 
 
     def set_seperator(self, seperator):
@@ -284,23 +286,24 @@ class BaseHandler(object):
         h5.attrs['comment'] = data['comment']
 
         try:
-            #data = self._get_merged(data)
+            if self.merge:
+                data = self._get_merged(data)
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():
                 for path, val in self._convert_to_ndarray(path,val):
-                    group.create_dataset(path, data=val, compression=COMPRESSION)
+                    group.create_dataset(path, data=val, compression=self.compression)
 
             group = h5.create_group('/data_descr')
             names = numpy.array(data['names']).astype(self.str_type)
             if names.size > 0: # simple 'if names' throws exception if array
-                group.create_dataset('names', data=names, compression=COMPRESSION)
+                group.create_dataset('names', data=names, compression=self.compression)
             ordering = numpy.array(data['ordering']).astype(self.str_type)
             if ordering.size > 0:
-                group.create_dataset('ordering', data=ordering, compression=COMPRESSION)
+                group.create_dataset('ordering', data=ordering, compression=self.compression)
             if 'types' in data:
                 types = numpy.array(data['types']).astype(self.str_type)
-                group.create_dataset('types', data=types, compression=COMPRESSION)
+                group.create_dataset('types', data=types, compression=self.compression)
         except: # just do some clean-up
             h5.close()
             os.remove(self.fname)
