@@ -84,8 +84,6 @@ def _get_extract_data(h5):
                     last = len(h5[dset])
                     if last > NUM_EXTRACT: last = NUM_EXTRACT
                     extract.append(h5[dset][:last])
-        import pdb
-        pdb.set_trace()
         extract = numpy.matrix(extract)
 
         # convert from numpy array to list, if necessary

@@ -145,7 +145,7 @@ def _try_matlab(fname):
 
 def _try_octave(fname):
     try:
-        return file(fname).read(13)==('# Created by '):
+        return file(fname).read(13)==('# Created by ')
     except:
         return False
 
