@@ -21,25 +21,25 @@ def get_num_instattr(fname):
     """
     try:
         h5 = h5py.File(fname, 'r')
-        if 'indptr' in h5['data']: # sparse
-            A = csc_matrix(
-                (h5['/data/data'], h5['/data/indices'], h5['/data/indptr'])
-            )
-            num_inst = A.shape[1]
-            num_attr = A.shape[0]
-        else:
-            num_inst = 0
-            num_attr = 0
-            # this seems a bit non-intuitive aka magic...
-            for name in h5['/data_descr/ordering']:
-                if name == 'label': continue
-                if len(h5['/data'][name].shape) == 2:
-                    num_attr += h5['/data'][name].shape[0]
-                    inst = h5['/data'][name].shape[1]
-                    if inst > num_inst:
-                        num_inst = inst
+        num_inst = 0
+        num_attr = 0
+        for name in h5['/data_descr/ordering']:
+            vname = '/data' + name
+            sp_indptr = vname+'_indptr'
+            sp_indices = vname+'_indices'
+
+            if sp_indptr in h5['/data'] and sp_indices in h5['/data']:
+                A = csc_matrix(
+                    (h5[vname], h5[sp_indices], h5[sp_indptr])
+                )
+                num_inst += A.shape[1]
+                num_attr += A.shape[0]
+            else:
+                if len(h5[vname].shape) == 2:
+                    num_attr += h5[vname].shape[0]
+                    num_inst = h5[vname].shape[1]
                 else:
-                    num_inst = h5['/data'][name].shape[0]
+                    num_inst = h5[vname].shape[0]
                     num_attr += 1
         h5.close()
     except:
@@ -59,19 +59,22 @@ def _get_extract_data(h5):
     """
     extract = []
     try:
-        if ('indptr' and 'indices') in h5['/data']:
-            # taking all data takes to long for quick viewing, but having just
-            # this extract may result in less columns displayed than indicated
-            # by attributes_names
-            data = h5['/data/data'][:h5['/data/indptr'][NUM_EXTRACT+1]]
-            indices = h5['/data/indices'][:h5['/data/indptr'][NUM_EXTRACT+1]]
-            indptr = h5['/data/indptr'][:NUM_EXTRACT+1]
-            A=csc_matrix((data, indices, indptr)).todense().T
-            extract = A[:NUM_EXTRACT].tolist()
-        else:
-            for dset in h5['/data_descr/ordering']:
-                if dset == 'label': continue
-                dset = 'data/' + dset
+        for dset in h5['/data_descr/ordering']:
+            dset = '/data/' + dset
+
+            dset_indptr = dset+'_indptr'
+            dset_indices = dset+'_indices'
+
+            if dset_indptr in h5['/data'] and dset_indices in h5['/data']:
+                # taking all data takes to long for quick viewing, but having just
+                # this extract may result in less columns displayed than indicated
+                # by attributes_names
+                data = h5[dset][:h5[dset_indptr][NUM_EXTRACT+1]]
+                indices = h5[dset_indices][:h5[dset_indptr][NUM_EXTRACT+1]]
+                indptr = h5[dset_indptr][:NUM_EXTRACT+1]
+                A=csc_matrix((data, indices, indptr)).todense()
+                extract.append(A[:NUM_EXTRACT].tolist())
+            else:
                 if type(h5[dset][0]) == numpy.ndarray:
                     last = len(h5[dset][0])
                     if last > NUM_EXTRACT: last = NUM_EXTRACT
@@ -81,7 +84,9 @@ def _get_extract_data(h5):
                     last = len(h5[dset])
                     if last > NUM_EXTRACT: last = NUM_EXTRACT
                     extract.append(h5[dset][:last])
-            extract = numpy.matrix(extract).T
+        import pdb
+        pdb.set_trace()
+        extract = numpy.matrix(extract)
 
         # convert from numpy array to list, if necessary
         t = type(extract[0])
@@ -107,16 +112,10 @@ def get_extract(fname):
     @rtype: dict with HDF5 attribute/dataset names as keys and their data as values
     """
     format = fileformat.get(fname)
-    if format != 'h5':
-        fname_h5 = fileformat.get_filename(fname)
-        try:
-            sep = fileformat.infer_seperator(fname)
-            c = converter.Converter(fname, fname_h5, format_in=format, seperator=sep)
-            c.run()
-        except converter.ConversionError:
-            return get_unparseable(fname)
-    else:
+    if fname.endswith('.h5'):
         fname_h5 = fname
+    else:
+        return get_unparseable(fname)
 
     extract = {
         'mldata': 0,
@@ -137,12 +136,10 @@ def get_extract(fname):
             extract[a] = h5.attrs[a]
 
     if '/data_descr/names' in h5:
-        extract['names'] = h5['/data_descr/names'][:].tolist()
-        if 'label' in extract['names']:
-            extract['names'].remove('label')
+        extract['names'] = h5['/data_descr/names'][:].tolist()[:NUM_EXTRACT]
 
     if '/data_descr/types' in h5:
-        extract['types'] = h5['/data_descr/types'][:].tolist()
+        extract['types'] = h5['/data_descr/types'][:].tolist()[:NUM_EXTRACT]
 
     extract['data'] = _get_extract_data(h5)
 
@@ -283,19 +280,25 @@ def _find_dset(fname, output_variables):
     h5 = h5py.File(fname, 'r')
     dset = None
 
-    if 'indptr' in h5['data']: # sparse
-        A = csc_matrix(
-            (h5['/data/data'], h5['/data/indices'], h5['/data/indptr'])
-        ).todense()
-        dset = A[output_variables].tolist()
-    else:
-        ov = output_variables
-        for name in h5['/data_descr/ordering']:
-            path = '/data/' + name
-            if name == 'label': # labels need to be transposed
-                data = h5[path][...].T
-            else:
-                data = h5[path][...]
+    ov = output_variables
+    for name in h5['/data_descr/ordering']:
+        path = '/data/' + name
+        path_indptr = dset+'_indptr'
+        path_indices = dset+'_indices'
+
+        if path_indptr in h5['/data'] and path_indices in h5['/data']:
+            A = csc_matrix(
+                (h5['/data/data'], h5['/data/indices'], h5['/data/indptr'])
+            )
+            if ov == 0:
+                for i in xrange(A.shape[0]):
+                    if ov == 0:
+                        dset = A[i].todense().tolist()
+                        break # inner loop
+                    else:
+                        ov -= 1
+        else:
+            data = h5[path][...]
 
             if len(data.shape) == 1: # datasets with shape (x,)
                 if ov == 0:

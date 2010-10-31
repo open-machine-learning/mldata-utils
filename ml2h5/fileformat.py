@@ -19,7 +19,10 @@ def infer_seperator(fname):
     seperator = None
     minimum = 1
 
-    for line in fp:
+    for i in xrange(10): # try the first 10 lines
+        line = fp.readline(1024*1024) # 1 MB max
+        if not line:
+            break
         for s in ALLOWED_SEPERATORS:
             l = len(line.split(s))
             if l > minimum:
@@ -43,7 +46,7 @@ def _try_suffix(fname):
     if suffix.find('/') != -1:
         return '', False
 
-    if suffix in ('svm', 'libsvm'):
+    if suffix in ('svm', 'libsvm', 'light', 'svmlight'):
         return 'libsvm', True
     elif suffix in ('arff'):
         return 'arff', True
@@ -61,9 +64,9 @@ def _try_suffix(fname):
         except IndexError:
             pass
         return suffix, True
-    elif suffix in ('mat', 'm', 'matlab'):
+    elif suffix in ('mat'):
         return 'matlab', True
-    elif suffix in ('octave', 'oct'):
+    elif suffix in ('octave'):
         return 'octave', True
     elif suffix in ('xml'):
         return 'xml', True
@@ -134,14 +137,24 @@ def _try_h5(fname):
     fp.close()
     return True
 
+def _try_matlab(fname):
+    try:
+        return file(fname).read(6) == 'MATLAB'
+    except:
+        return False
 
+def _try_octave(fname):
+    try:
+        return file(fname).read(13)==('# Created by '):
+    except:
+        return False
 
 def get(fname, skip_suffix=False):
     """Get format of given file.
 
     By suffix it detects: libsvm, arff, csv, h5, uci, tar.gz, tar.bz2, zip,
     matlab, octave.
-    By deeper inspection it detects: arff, csv, libsvm, h5.
+    By deeper inspection it detects: h5, matlab, octave, arff, csv, libsvm
 
     @param fname: name of file to determine format for
     @type fname: string
@@ -153,10 +166,12 @@ def get(fname, skip_suffix=False):
         if found:
             return format
 
-    if _try_arff(fname): return 'arff'
-    elif _try_csv(fname): return 'csv'
+    if _try_h5(fname): return 'h5'
+    elif _try_matlab(fname): return 'matlab'
+    elif _try_octave(fname): return 'octave'
     elif _try_libsvm(fname): return 'libsvm'
-    elif _try_h5(fname): return 'h5'
+    elif _try_csv(fname): return 'csv'
+    elif _try_arff(fname): return 'arff'
 
     return 'unknown'
 
@@ -170,7 +185,3 @@ def get_filename(orig):
     @rtype: string
     """
     return os.path.splitext(orig)[0] + '.h5'
-
-
-
-
