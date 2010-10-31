@@ -89,14 +89,14 @@ class H5_LibSVM(BaseHandler):
             'name': self.get_name(),
             'comment': 'LibSVM',
             'ordering': ['label', 'data'],
-            'names': ['label', 'data'],
+            'names': [],
             'data': { 'label' : label, 'data' : data}
         }
 
 
     def write(self, data):
-        names=('label','data')
-        if not set(data['data'].keys()).issubset(set(names)):
+        ordering=('label','data')
+        if not set(data['data'].keys()).issubset(set(ordering)):
             raise ml2h5.converter.ConversionError('libsvm format needs data or label')
 
         t = type(data['data']['data'])
@@ -112,7 +112,7 @@ class H5_LibSVM(BaseHandler):
                 self.is_multilabel = False
 
         lengths=dict()
-        for o in names:
+        for o in ordering:
             try:
                 lengths[o]=data['data'][o].shape[1]
             except (AttributeError, IndexError):
@@ -123,7 +123,7 @@ class H5_LibSVM(BaseHandler):
 
         for i in xrange(l):
             out = []
-            for o in names:
+            for o in ordering:
                 d=data['data'][o]
                 if o == 'label':
                     if self.is_multilabel:
