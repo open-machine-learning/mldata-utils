@@ -89,7 +89,10 @@ class Converter(object):
             self.handler_in = HANDLERS[self.format_in](fname_in, seperator)
             if self.format_in == 'csv':
                 self.handler_in.attribute_names_first = attribute_names_first
-            self.handler_out = HANDLERS[self.format_out](fname_out, seperator)
+            if self.format_in in ['csv','arff']:
+                self.handler_out = HANDLERS[self.format_out](fname_out, seperator,merge=True)
+            else:    
+                self.handler_out = HANDLERS[self.format_out](fname_out, seperator)
             if self.format_out == 'csv':
                 self.handler_out.attribute_names_first = attribute_names_first
         except KeyError:

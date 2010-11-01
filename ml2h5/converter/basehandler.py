@@ -22,7 +22,7 @@ class BaseHandler(object):
     str_type = h5py.new_vlen(numpy.str)
 
 
-    def __init__(self, fname, seperator=None, compression=None, merge=True):
+    def __init__(self, fname, seperator=None, compression=None, merge=False):
         """
         @param fname: name of in-file
         @type fname: string
