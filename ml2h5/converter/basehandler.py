@@ -167,7 +167,7 @@ class BaseHandler(object):
             'data': dict(),
         }
 
-        if 'names' in h5.keys():
+        if '/data_descr/names' in h5:
            contents['names']=h5['/data_descr/names'][...].tolist()
 
         if '/data_descr/types' in h5:
