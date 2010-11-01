@@ -191,11 +191,11 @@ def get_filename(orig):
     return os.path.splitext(orig)[0] + '.h5'
 
 
-def can_convert_h5_to(dst_type, h5_file=None):
+def can_convert_h5_to(dst_type, h5_filename=None):
     """Whether conversion from this particular h5 file to dst type is supported
 
-    @param h5_file: opened h5 file or None
-    @type h5_file: file
+    @param h5_filename: h5 filename or None
+    @type h5_filename: string
     @param dst_type: name of type
     @type dst_type: string
     @return: True if possible
@@ -204,9 +204,9 @@ def can_convert_h5_to(dst_type, h5_file=None):
     if dst_type in ('matlab', 'octave'):
         return True
 
-    if h5_file:
+    if h5_filename and h5_filename.endswith('.h5'):
         try:
-            h5 = h5py.File(self.fname, 'r')
+            h5 = h5py.File(h5_filename, 'r')
 
             if dst_type=='libsvm': # libsvm requires data/label
                 ordering=('label','data')
