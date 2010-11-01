@@ -3,38 +3,6 @@ import os.path
 from ml2h5.converter.basehandler import ALLOWED_SEPERATORS
 from ml2h5.converter import AUTODETECTION_MAXBUFLEN
 
-def infer_seperator(fname):
-    """Infer seperator for variables in given file.
-
-    @param fname: filename to retrieve data from
-    @type fname: string
-    @return: inferred seperator
-    @rtype: string
-    """
-    try:
-        fp = open(fname, 'r')
-    except:
-        return None
-
-    seperator = None
-    minimum = 1
-
-    for i in xrange(10): # try the first 10 lines
-        line = fp.readline(1024*1024) # 1 MB max
-        if not line:
-            break
-        for s in ALLOWED_SEPERATORS:
-            l = len(line.split(s))
-            if l > minimum:
-                minimum = l
-                seperator = s
-        if seperator:
-            break
-
-    fp.close()
-    return seperator
-
-
 def _try_suffix(fname):
     """Get format of given file by suffix.
 
@@ -149,6 +117,42 @@ def _try_octave(fname):
     except:
         return False
 
+def infer_seperator(fname):
+    """Infer seperator for variables in given file.
+
+    @param fname: filename to retrieve data from
+    @type fname: string
+    @return: inferred seperator
+    @rtype: string
+    """
+    try:
+        fp = open(fname, 'r')
+    except:
+        return None
+
+    seperator = None
+    minimum = 1
+
+    for i in xrange(3): # try the first 3 lines
+        line = fp.readline(AUTODETECTION_MAXBUFLEN)
+        if not line:
+            break
+        for s in ALLOWED_SEPERATORS:
+            l = len(line.split(s))
+            if l > minimum:
+                minimum = l
+                seperator = s
+        if seperator:
+            break
+
+        # stop processing if lines are too long anyways
+        if not line.endswith('\n')
+            break
+
+    fp.close()
+    return seperator
+
+
 def get(fname, skip_suffix=False):
     """Get format of given file.
 
@@ -185,3 +189,34 @@ def get_filename(orig):
     @rtype: string
     """
     return os.path.splitext(orig)[0] + '.h5'
+
+
+def can_convert_h5_to(dst_type, h5_file=None):
+    """Whether conversion from this particular h5 file to dst type is supported
+
+    @param h5_file: opened h5 file or None
+    @type h5_file: file
+    @param dst_type: name of type
+    @type dst_type: string
+    @return: True if possible
+    """
+
+    if dst_type in ('matlab', 'octave'):
+        return True
+
+    if h5_file:
+        try:
+            h5 = h5py.File(self.fname, 'r')
+
+            if dst_type=='libsvm': # libsvm requires data/label
+                ordering=('label','data')
+                if set(h5['data'].keys()).issubset(set(ordering)):
+                    return True # TODO check if this is sparse data / ndarray data
+            elif dst_type in ('csv', 'arff'): # csv/arff support everything except sparse data
+                for k in h5['data'].keys():
+                    if k.endswith('_indptr') or k.endswith('_indices'):
+                        return False
+                return True
+        except:
+            pass
+    return False

@@ -132,24 +132,17 @@ class Converter(object):
         @param B: list B to compare
         @type B: list of list
         """
-    #        eps_dec = Decimal(str(EPSILON))
         xrange_A0 = xrange(len(A[0]))
         for i in xrange(len(A)):
             Ai = A[i]
             Bi = B[i]
             for j in xrange_A0:
                 try:
-    #                    a = Decimal(str(Ai[j]))
-    #                    b = Decimal(str(Bi[j]))
-    #                    if abs(a - b) > eps_dec:
                     if abs(Ai[j] - Bi[j]) > EPSILON:
                         return False
                 except TypeError: #string
                     if str(Ai[j]) != str(Bi[j]):
                         return False
-    #                except InvalidOperation: # string
-    #                    if str(Ai[j]) != str(Bi[j]):
-    #                        return False
         return True
 
 
