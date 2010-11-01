@@ -146,7 +146,7 @@ def infer_seperator(fname):
             break
 
         # stop processing if lines are too long anyways
-        if not line.endswith('\n')
+        if not line.endswith('\n'):
             break
 
     fp.close()
