@@ -79,7 +79,35 @@ class H5_ARFF(BaseHandler):
         if data.has_key('names') and len(data['names']):
             af.attributes = data['names']
         else:
-            af.attributes = data['ordering']
+            attrs=[]
+            idx=0
+            for o in data['ordering']:
+                try:
+                    num=data['data'][o].shape[1]
+                    if data['data'][o].dtype == numpy.double:
+                        prefix='double'
+                    elif data['data'] == numpy.int:
+                        prefix='int'
+                    else:
+                        prefix='string'
+                except AttributeError:
+                    num=len(data['data'][o])
+                    prefix='string'
+                except IndexError:
+                    num=len(data['data'][o])
+                    if data['data'][o].dtype == numpy.double:
+                        prefix='double'
+                    elif data['data'] == numpy.int:
+                        prefix='int'
+                    else:
+                        prefix='string'
+                
+                for i in xrange(num):
+                    attrs.append('%s%d' % (prefix,idx))
+                    idx+=1
+
+            af.attributes = attrs
+
         af.relation = data['name']
         af.comment = data['comment']
 

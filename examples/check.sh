@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-for d in friedman-datasets-fri_c2_100_50.arff C_elegans_acc_seq.arff iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5 
+for d in bodyfat.h5 friedman-datasets-fri_c2_100_50.arff C_elegans_acc_seq.arff iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5 
 do
 	echo -n "checking data set $d"
 	for type in .oct .csv .mat .arff 
