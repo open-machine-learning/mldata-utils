@@ -83,28 +83,28 @@ class H5_ARFF(BaseHandler):
             idx=0
             for o in data['ordering']:
                 try:
-                    num=data['data'][o].shape[1]
+                    if len(data['data'][o].shape)==1:
+                        num=1
+                    else:
+                        num=data['data'][o].shape[0]
+
                     if data['data'][o].dtype == numpy.double:
                         prefix='double'
-                    elif data['data'] == numpy.int:
+                    elif data['data'][o].dtype == numpy.int:
                         prefix='int'
                     else:
-                        prefix='string'
-                except AttributeError:
-                    num=len(data['data'][o])
-                    prefix='string'
-                except IndexError:
-                    num=len(data['data'][o])
-                    if data['data'][o].dtype == numpy.double:
-                        prefix='double'
-                    elif data['data'] == numpy.int:
-                        prefix='int'
-                    else:
-                        prefix='string'
-                
+                        prefix='str'
+
+                except AttributeError: # list - so assume list of strings
+                    num=1
+                    prefix='str'
+
                 for i in xrange(num):
                     attrs.append('%s%d' % (prefix,idx))
                     idx+=1
+
+            if len(attrs)==len(data['ordering']):
+                attrs=data['ordering']
 
             af.attributes = attrs
 

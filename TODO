@@ -18,6 +18,9 @@ ARFF
 - should work for all types except sparse data but won't work with strings
 containing "," - no escaping is done here
 
+uci-20070111 spambase (3842) failed slurping
+
+
 LIBSVM
 ======
 works for all even multi-label data sets, however slurping failed for
