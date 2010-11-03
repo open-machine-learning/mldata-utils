@@ -24,14 +24,14 @@ def get_num_instattr(fname):
         num_inst = 0
         num_attr = 0
         for name in h5['/data_descr/ordering']:
-            vname = '/data' + name
+            vname = '/data/' + name
             sp_indptr = vname+'_indptr'
             sp_indices = vname+'_indices'
 
             if sp_indptr in h5['/data'] and sp_indices in h5['/data']:
                 A = csc_matrix(
-                    (h5[vname], h5[sp_indices], h5[sp_indptr])
-                )
+                        (h5[vname], h5[sp_indices], h5[sp_indptr])
+                        )
                 num_inst += A.shape[1]
                 num_attr += A.shape[0]
             else:
