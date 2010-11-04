@@ -130,10 +130,11 @@ def infer_seperator(fname):
     except:
         return None
 
+    print fname
     seperator = None
     minimum = 1
 
-    for i in xrange(3): # try the first 3 lines
+    for i in xrange(100): # try the first 100 lines
         line = fp.readline(AUTODETECTION_MAXBUFLEN)
         if not line:
             break
