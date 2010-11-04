@@ -30,6 +30,8 @@ class H5_MAT(BaseHandler):
                     else:
                         cell.append('')
                 matf[k]=cell
+            elif matf[k].shape[0] == 1: # row vectors are expanded
+                matf[k]=matf[k][0]
 
         data = matf
         ordering = matf.keys()
