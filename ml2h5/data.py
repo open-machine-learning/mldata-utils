@@ -317,6 +317,24 @@ def _find_dset(fname, output_variables):
     h5.close()
     return dset
 
+def get_attribute_types(fname):
+    types=set()
+    try:
+        h5 = h5py.File(fname, 'r')
+        for o in h5['/data_descr/ordering']:
+            print o
+            try:
+                types += h5['/data_descr/types'][o]
+            except:
+                print "except"
+                print str(h5['/data/'][o].dtype)
+                types.add(str(h5['/data/'][o].dtype))
+
+        h5.close()
+    except:
+        pass
+
+    return ','.join(list(types))
 
 def get_correct(fname, test_idx, output_variables):
     """Get correct results from given file from given example indices at given attribute index.
