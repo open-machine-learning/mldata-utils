@@ -139,7 +139,7 @@ class H5_OCTAVE(BaseHandler):
         @return data: csc_matrix
         """
 
-        tmp_data=numpy.array(self._read_matrix(octf,col,row)).T
+        tmp_data=numpy.array(self._read_matrix(octf,0,0)).T
         data=csc_matrix((tmp_data[2],tmp_data[0:2]-1),shape=(row,col))
         data.sort_indices()
 
@@ -188,7 +188,9 @@ class H5_OCTAVE(BaseHandler):
             line = octf.readline()
         octf.seek(lpos)
         out =  numpy.array(data)
-        out.shape=(row,col)
+        # unknown matrix shape ?
+        if not (row==0 and col==0):
+            out.shape=(row,col)
         if out.shape[0]==1:
             out.shape=(out.shape[1],)
         return out

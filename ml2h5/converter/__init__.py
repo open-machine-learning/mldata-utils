@@ -59,7 +59,7 @@ class Converter(object):
     @type handler_out: derivate of BaseHandler
     """
 
-    def __init__(self, fname_in, fname_out, format_in=None, format_out=None, seperator=None, attribute_names_first=False):
+    def __init__(self, fname_in, fname_out, format_in=None, format_out=None, seperator=None, attribute_names_first=False,merge=True):
         """
         @param fname_in: name of in-file
         @type fname_in: string
@@ -86,11 +86,11 @@ class Converter(object):
             self.format_out = ml2h5.fileformat.get(fname_out)
 
         try:
-            self.handler_in = HANDLERS[self.format_in](fname_in, seperator,merge=True)
+            self.handler_in = HANDLERS[self.format_in](fname_in, seperator,merge=merge)
 
             if self.format_in == 'csv':
                 self.handler_in.attribute_names_first = attribute_names_first
-            self.handler_out = HANDLERS[self.format_out](fname_out, seperator,merge=True)
+            self.handler_out = HANDLERS[self.format_out](fname_out, seperator,merge=merge)
             if self.format_out == 'csv':
                 self.handler_out.attribute_names_first = attribute_names_first
         except KeyError:
