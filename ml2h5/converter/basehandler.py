@@ -218,8 +218,7 @@ class BaseHandler(object):
         merged = {}
         ordering = []
         path = ''
-        idx_int = 0
-        idx_double = 0
+        idx = 0
         merging = None
         for name in data['ordering']:
             val = data['data'][name]
@@ -245,19 +244,19 @@ class BaseHandler(object):
                     merged[path].append(val)
                 else:
                     merging = 'int'
-                    path = 'int' + str(idx_int)
+                    path = 'int' + str(idx)
                     ordering.append(path)
                     merged[path] = [val]
-                    idx_int += 1
+                    idx += 1
             elif t == numpy.double:
                 if merging == 'double':
                     merged[path].append(val)
                 else:
                     merging = 'double'
-                    path = 'double' + str(idx_double)
+                    path = 'double' + str(idx)
                     ordering.append(path)
                     merged[path] = [val]
-                    idx_double += 1
+                    idx += 1
             else: # string or matrix
                 merging = None
                 if name.find('/') != -1: # / sep belongs to hdf5 path
@@ -267,8 +266,11 @@ class BaseHandler(object):
                     path = name
                 ordering.append(path)
                 merged[path] = val
-
-        data['data'] = merged
+        data['data'] = {}        
+        for k in merged:
+            if len(merged[k])==1:
+                merged[k] = merged[k][0]    
+            data['data'][k] = numpy.array(merged[k])
         data['ordering'] = ordering
         return data
 
@@ -286,8 +288,6 @@ class BaseHandler(object):
         h5.attrs['comment'] = data['comment']
 
         try:
-            if self.merge:
-                data = self._get_merged(data)
 
             group = h5.create_group('/data')
             for path, val in data['data'].iteritems():

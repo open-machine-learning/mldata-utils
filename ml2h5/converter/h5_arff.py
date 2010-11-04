@@ -55,8 +55,7 @@ class H5_ARFF(BaseHandler):
             else:
                 t = self.get_datatype(values)
             data[name] = numpy.array(values).astype(t)
-
-        return {
+        ddict= {
             'name': af.relation,
             'comment': af.comment,
             'types': self._get_types(af),
@@ -65,6 +64,9 @@ class H5_ARFF(BaseHandler):
             'data':data,
         }
 
+        if self.merge == True:
+            ddict = self._get_merged(ddict)
+        return ddict
     def check_sparse(self, data):
         for k in data.keys():
             d=data[k]

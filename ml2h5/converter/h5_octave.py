@@ -47,6 +47,8 @@ class H5_OCTAVE(BaseHandler):
             data=self._read_matrix(octf,1,1)
         elif meta['dtype']=='matrix':
             data=self._read_matrix(octf,meta['columns'],meta['rows'])
+        elif meta['dtype']=='int32 matrix':
+            data=self._read_matrix(octf,1,1,mtype='int')
         elif meta['dtype']=='sparse matrix':
             data=self._read_sparse_matrix(octf,meta['columns'],meta['rows'])
         elif meta['dtype']=='cell':
@@ -94,6 +96,8 @@ class H5_OCTAVE(BaseHandler):
                 meta['elements']=int(sp[1])
             if sp[0]=='# length':
                 meta['length']=int(sp[1])
+            if sp[0]=='# ndims':
+                meta['ndims']=int(sp[1])
             lpos=octf.tell()
             line = octf.readline()
         octf.seek(lpos)
@@ -151,6 +155,14 @@ class H5_OCTAVE(BaseHandler):
         data=[]
         line=octf.readline()
         lpos=octf.tell()
+        if mtype=='int':
+            if line.startswith(' '):
+                line=line[1:]
+            sp=line[:-1].split(' ')
+            row=int(sp[0])
+            col=int(sp[1])
+            line=octf.readline()
+
         while line and not line.startswith('#'):
             if line.startswith(' '):
                 line=line[1:]
@@ -176,9 +188,9 @@ class H5_OCTAVE(BaseHandler):
             line = octf.readline()
         octf.seek(lpos)
         out =  numpy.array(data)
+        out.shape=(row,col)
         if out.shape[0]==1:
             out.shape=(out.shape[1],)
-
         return out
 
     def read(self):
@@ -271,25 +283,33 @@ class H5_OCTAVE(BaseHandler):
                     of.write('# type: cell\n')
                     of.write('# rows: 1\n')
                     of.write('# columns: ' + str(len(attr)) + '\n')
-                else:
-                    of.write('# type: matrix\n')
-                    of.write('# rows: 1\n')
-                    try:
-                        of.write('# columns: ' + str(attr.shape[0]) + '\n')
-                    except IndexError:
-                        of.write('# columns: 1\n')
+                else:    
+                    if attr.dtype in ['int32', 'int64']:
+                        of.write('# type: int32 matrix\n')   
+                        of.write('# ndims 2\n')
+                    else:    
+                        of.write('# type: matrix\n')
+                        of.write('# rows: 1\n')
+                        try:
+                            of.write('# columns: ' + str(attr.shape[0]) + '\n')
+                        except IndexError:
+                            of.write('# columns: 1\n')
 
             else:
-                of.write('# type: matrix\n')
-                try:
-                    of.write('# rows: ' + str(attr.shape[0]) + '\n')
-                except IndexError:
-                    of.write('# rows: 1\n')
+                if attr.dtype in ['int32', 'int64']:
+                    of.write('# type: int32 matrix\n')   
+                    of.write('# ndims 2\n')
+                else:   
+                    of.write('# type: matrix\n')
+                    try:
+                        of.write('# rows: ' + str(attr.shape[0]) + '\n')
+                    except IndexError:
+                        of.write('# rows: 1\n')
 
-                try:
-                    of.write('# columns: ' + str(attr.shape[1]) + '\n')
-                except IndexError:
-                    of.write('# columns: 1\n')
+                    try:
+                        of.write('# columns: ' + str(attr.shape[1]) + '\n')
+                    except IndexError:
+                        of.write('# columns: 1\n')
 
         elif type(attr)== csc_matrix:
             of.write('# type: sparse matrix\n')
@@ -327,17 +347,32 @@ class H5_OCTAVE(BaseHandler):
                 of.write(str(attr_num[0]) + '\n')
             # matrix
             elif len(attr.shape)==2:
-                for i in attr_num:
-                    for j in i:
-                        of.write(' ' + str(j))
-                    of.write('\n')
+                # int32 matrix     
+                if attr.dtype in ['int32','int64']: 
+                    of.write(' ' + str(attr.shape[0]) + ' ' + str(attr.shape[1]) + '\n')    
+                    for i in attr:
+                        for j in i:
+                            of.write(' ' + str(j) + '\n')
+                # float matrix            
+                else:            
+                    for i in attr_num:
+                        for j in i:
+                            of.write(' ' + str(j))
+                        of.write('\n')
             # matrix (vector) or cell array
             elif len(attr.shape)==1:
                 # matrix
                 if attr_num!=None:
-                    for i in attr_num:
-                        of.write(' ' + str(i))
-                    of.write('\n')
+                    # int32 matrix     
+                    if attr.dtype in ['int32', 'int64']: 
+                        of.write(' 1 ' + str(attr.shape[0]) + '\n')    
+                        for i in attr:
+                            of.write(' ' + str(i) + '\n')
+                    # float matrix            
+                    else:            
+                        for i in attr_num:
+                            of.write(' ' + str(i))
+                        of.write('\n')
                 else:
                     # cell array
                     for i in attr:
@@ -384,7 +419,6 @@ class H5_OCTAVE(BaseHandler):
     def write(self, data):
         of = open(self.fname,'w')
         of.writelines(self._oct_header())
-
         for o in data['ordering']:
             self._print_meta(of,data['data'][o], o)
             self._print_data(of,data['data'][o])

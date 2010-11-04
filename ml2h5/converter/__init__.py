@@ -86,13 +86,11 @@ class Converter(object):
             self.format_out = ml2h5.fileformat.get(fname_out)
 
         try:
-            self.handler_in = HANDLERS[self.format_in](fname_in, seperator)
+            self.handler_in = HANDLERS[self.format_in](fname_in, seperator,merge=True)
+
             if self.format_in == 'csv':
                 self.handler_in.attribute_names_first = attribute_names_first
-            if self.format_in in ['csv','arff']:
-                self.handler_out = HANDLERS[self.format_out](fname_out, seperator,merge=True)
-            else:    
-                self.handler_out = HANDLERS[self.format_out](fname_out, seperator)
+            self.handler_out = HANDLERS[self.format_out](fname_out, seperator,merge=True)
             if self.format_out == 'csv':
                 self.handler_out.attribute_names_first = attribute_names_first
         except KeyError:
@@ -110,13 +108,13 @@ class Converter(object):
         @param remove_out: if output file shall be removed before running.
         @type remove_out: boolean
         """
-
         # sometimes it seems files are not properly overwritten when opened by
         # 'w' during run().
         if remove_out and os.path.exists(self.fname_out):
             os.remove(self.fname_out)
 
         try:
+                
             data = self.handler_in.read()
             self.handler_out.write(data)
             if verify:
@@ -135,49 +133,38 @@ class Converter(object):
         @param B: list B to compare
         @type B: list of list
         """
-        xrange_A0 = xrange(len(A[0]))
-        for i in xrange(len(A)):
-            Ai = A[i]
-            Bi = B[i]
-            for j in xrange_A0:
+        if type(A) == csc_matrix:
+            try:
+                if A.indices==B.indices and A.indptr==B.indptr and A.data==B.data:
+                    return True
+                else:
+                    return False
+            except:
+                return False
+
+        try:
+            xrange_A0 = xrange(len(A[0]))
+            for i in xrange(len(A)):
+                Ai = A[i]
+                Bi = B[i]
+                for j in xrange_A0:
+                    try:
+                        if abs(Ai[j] - Bi[j]) > EPSILON:
+                            return False
+                    except TypeError: #string
+                        if str(Ai[j]) != str(Bi[j]):
+                            return False
+        except TypeError:
+            for j in xrange(len(A)):
                 try:
-                    if abs(Ai[j] - Bi[j]) > EPSILON:
+                    if abs(A[j] - B[j]) > EPSILON:
                         return False
                 except TypeError: #string
-                    if str(Ai[j]) != str(Bi[j]):
+                    if str(A[j]) != str(B[j]):
                         return False
+        except:
+            return False    
         return True
-
-
-    def _get_datablock(self, ordering, data):
-        """Join given data elements into one big block.
-
-        Joining individual vectors/matrices ->
-        the need to construct this seems really inefficient - maybe should
-        reconsider what read() returns.
-
-        @param ordering: ordering of data elements
-        @type ordering: list of strings
-        @param data: data elements to join
-        @type data: dict
-        """
-        if type(data) != dict: # if read from HDF5
-            return data
-
-        if 'indptr' in data: # sparse:
-            block = csc_matrix((data['data'], data['indices'], data['indptr'])).todense().tolist()
-        else:
-            block = []
-            for name in ordering:
-                if name == 'label': continue
-                if type(data[name]) == numpy.matrix:
-                    for row in data[name]:
-                        block.append(row.tolist()[0])
-                else:
-                    block.append(data[name])
-            block = numpy.matrix(block).T.tolist()
-
-        return block
 
 
     def verify(self):
@@ -191,7 +178,6 @@ class Converter(object):
             raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_in)
         if self.format_out == 'uci':
             raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_out)
-
         data_in = self.handler_in.read()
         data_out = self.handler_out.read()
 
@@ -200,12 +186,13 @@ class Converter(object):
                 raise ConversionError(
                     'Verification failed! Labels of %s != %s' % (self.fname_in, self.fname_out)
                 )
-
-        block_in = self._get_datablock(data_in['ordering'], data_in['data'])
-        block_out = self._get_datablock(data_out['ordering'], data_out['data'])
-        if not self._compare(block_in, block_out):
-            raise ConversionError(
-                'Verification failed! Data of %s != %s' % (self.fname_in, self.fname_out)
+        
+        for i in xrange(len(data_in['ordering'])):
+            name_in = data_in['ordering'][i]
+            name_out = data_out['ordering'][i]
+            if not self._compare(data_in['data'][name_in], data_out['data'][name_out]):
+                raise ConversionError(
+                    'Verification failed! Data of %s != %s' % (self.fname_in, self.fname_out)
             )
 
         return True

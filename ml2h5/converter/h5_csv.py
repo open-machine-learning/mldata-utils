@@ -71,7 +71,7 @@ class H5_CSV(BaseHandler):
 
         if not names:
             names = copy.copy(ordering)
-        return {
+        ddict = {
             'name': self.get_name(),
             'comment': 'CSV',
             'names': names,
@@ -79,6 +79,9 @@ class H5_CSV(BaseHandler):
             'data': data,
         }
 
+        if self.merge == True:
+            ddict = self._get_merged(ddict)
+        return ddict
 
     def write(self, data):
         lengths=dict()
