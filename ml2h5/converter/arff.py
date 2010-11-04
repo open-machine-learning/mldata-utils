@@ -238,7 +238,7 @@ class ArffFile(object):
         for n, v in zip(self.attributes, l):
             at = self.attribute_types[n]
             if at == 'numeric':
-                if v == '?':
+                if v == '?' or v == '':
                     datum.append(numpy.nan)
                 elif re.match(r'[+-]?[0-9]*(?:\.[0-9]*(?:[eE]-?[0-9]+)?)?', v):
                     datum.append(float(v))
