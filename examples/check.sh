@@ -10,7 +10,7 @@ do
 		echo -n "$type "
 
 		echo -n 1.. 
-		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/$d tmp/${d}${type}
+		PYTHONPATH=.. python ../scripts/ml2h5conv $d tmp/${d}${type}
 		echo -n 2..
 		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/${d}${type} tmp/${d}
 		echo -n 3..
