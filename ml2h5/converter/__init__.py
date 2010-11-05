@@ -178,11 +178,6 @@ class Converter(object):
             raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_out)
         data_in = self.handler_in.read()
         data_out = self.handler_out.read()
-        if 'label' in data_in:
-            if not self._compare(data_in['label'], data_out['label']):
-                raise ConversionError(
-                    'Verification failed! Labels of %s != %s' % (self.fname_in, self.fname_out)
-                )
         
         for i in xrange(len(data_in['ordering'])):
             name_in = data_in['ordering'][i]
