@@ -34,7 +34,7 @@ setup(
     license=LICENSE,
     url=URL,
     packages=['ml2h5', 'ml2h5.converter', 'mleval'],
-    scripts=['scripts/ml2h5conv', 'scripts/ml2h5extract_data', 'scripts/ml2h5extract_task'],
+    scripts=['scripts/ml2h5', 'scripts/ml2h5extract_data', 'scripts/ml2h5extract_task', 'scripts/mleval'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
