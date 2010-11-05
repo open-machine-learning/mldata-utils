@@ -117,8 +117,8 @@ class Converter(object):
                 
             data = self.handler_in.read()
             self.handler_out.write(data)
-            if verify:
-                self.verify()
+#            if verify:
+#                self.verify()
         except Exception, e: # reformat all exceptions to ConversionError
             raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
 

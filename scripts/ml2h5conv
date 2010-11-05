@@ -18,6 +18,7 @@ def oParse():
     parser.add_option('-i', '--format-in',dest='format_in',help='',default=None)
     parser.add_option('-o', '--format-out',dest='format_out',help='',default=None)
     parser.add_option('-m', '--merge-data',action='store_true',dest='merge',help='',default=False)
+    parser.add_option('-n', '--no-conversion',action='store_false',dest='convert',help='',default=True)
     
     return parser.parse_args()
 
@@ -156,4 +157,7 @@ if __name__ == "__main__":
         attribute_names_first=Options.attribute_names_first,
         merge=Options.merge
     )
-    c.run(verify=Options.verify)
+    if Options.convert:
+        c.run(verify=Options.verify)
+    if Options.verify:
+        c.verify()    
