@@ -196,8 +196,6 @@ class BaseHandler(object):
                 except:
                     pass
                 contents['data'][name] = d
-        if self.merge:
-            contents=self._get_merged(contents)    
         h5.close()
         return contents
 
