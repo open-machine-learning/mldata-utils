@@ -134,13 +134,13 @@ def parse_options():
 
 
 if __name__ == "__main__":
+#    parse_options()
+    (Options,args)=oParse()
     argc = len(sys.argv)
     if  argc < 3:
         usage()
         sys.exit(1)
 
-#    parse_options()
-    (Options,args)=oParse()
 #    if sys.argv[2] == 'h5':
     if args[1] == 'h5':
         seperator = None
