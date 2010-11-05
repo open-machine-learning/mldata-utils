@@ -135,14 +135,14 @@ class Converter(object):
         """
         if type(A) == csc_matrix:
             try:
-                if A.indices==B.indices and A.indptr==B.indptr and A.data==B.data:
+                if all(A.indices==B.indices) and all(A.indptr==B.indptr) and all(A.data==B.data):
                     return True
                 else:
                     return False
             except:
                 return False
 
-        try:
+        if type(A[0])==numpy.ndarray:
             xrange_A0 = xrange(len(A[0]))
             for i in xrange(len(A)):
                 Ai = A[i]
@@ -154,7 +154,7 @@ class Converter(object):
                     except TypeError: #string
                         if str(Ai[j]) != str(Bi[j]):
                             return False
-        except TypeError:
+        else:
             for j in xrange(len(A)):
                 try:
                     if abs(A[j] - B[j]) > EPSILON:
@@ -162,8 +162,6 @@ class Converter(object):
                 except TypeError: #string
                     if str(A[j]) != str(B[j]):
                         return False
-        except:
-            return False    
         return True
 
 
@@ -180,7 +178,6 @@ class Converter(object):
             raise ConversionError('Cannot verify UCI data format, %s!' % self.fname_out)
         data_in = self.handler_in.read()
         data_out = self.handler_out.read()
-
         if 'label' in data_in:
             if not self._compare(data_in['label'], data_out['label']):
                 raise ConversionError(

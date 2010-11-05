@@ -39,7 +39,6 @@ class H5_ARFF(BaseHandler):
         names = []
         ordering = []
         af = arff.ArffFile.load(self.fname)
-
         for name in af.attributes:
             names.append(name)
             data[name] = []
@@ -47,7 +46,6 @@ class H5_ARFF(BaseHandler):
         for item in af.data:
             for i in xrange(len(data)):
                 data[names[i]].append(item[i])
-
         # conversion to proper data types
         for name, values in data.iteritems():
             if af.attribute_types[name] == 'date':
@@ -63,6 +61,7 @@ class H5_ARFF(BaseHandler):
             'ordering':copy.copy(names),
             'data':data,
         }
+        
 
         if self.merge == True:
             ddict = self._get_merged(ddict)
@@ -92,11 +91,10 @@ class H5_ARFF(BaseHandler):
 
                     if data['data'][o].dtype == numpy.double:
                         prefix='double'
-                    elif data['data'][o].dtype == numpy.int:
+                    elif data['data'][o].dtype in [numpy.int32, numpy.int64 ]:
                         prefix='int'
                     else:
                         prefix='str'
-
                 except AttributeError: # list - so assume list of strings
                     num=1
                     prefix='str'

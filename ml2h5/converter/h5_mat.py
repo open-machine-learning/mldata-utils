@@ -34,20 +34,23 @@ class H5_MAT(BaseHandler):
                 matf[k]=matf[k][0]
 
         data = matf
-        ordering = matf.keys()
+        if matf.has_key('mldata_descr_ordering'):
+            ordering = matf['mldata_descr_ordering']
+            del(matf['mldata_descr_ordering'])
+            
+        else:        
+            ordering = matf.keys()
 
-        def strip_type(x):
-            if x.startswith('double'):
-                return int(x[6:])
-            elif x.startswith('int'):
-                return int(x[3:])
-            elif x.startswith('str'):
-                return int(x[3:])
-            else:
-                return x
-
-        ordering.sort(cmp=lambda x,y: cmp(strip_type(x),strip_type(y)))
-
+            def strip_type(x):
+                if x.startswith('double'):
+                    return int(x[6:])
+                elif x.startswith('int'):
+                    return int(x[3:])
+                elif x.startswith('str'):
+                    return int(x[3:])
+                else:
+                    return x
+            ordering.sort(cmp=lambda x,y: cmp(strip_type(x),strip_type(y)))
         return {
             'name': self.get_name(),
             'comment': 'matlab',
@@ -74,8 +77,7 @@ class H5_MAT(BaseHandler):
                     cell[0,i]=numpy.array(unicode(d[k][i]), dtype='U')
                 d[k] = cell
 
-
-
+        d['mldata_descr_ordering']=numpy.array(data['ordering'],dtype=numpy.object)
         savemat(self.fname, d,
                 appendmat=False,
                 oned_as='row',

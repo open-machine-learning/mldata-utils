@@ -150,7 +150,10 @@ class ArffFile(object):
             for e, a in zip(d, self.attributes):
                 at = self.attribute_types[a]
                 if at == 'numeric':
-                    line.append(str(float(e)))
+                    if type(e) in [numpy.int32,numpy.int64]:
+                        line.append(str(int(e)))
+                    else:        
+                        line.append(str(float(e)))
                 elif at == 'string':
                     line.append(self.esc(e))
                 elif at == 'date':
@@ -241,7 +244,10 @@ class ArffFile(object):
                 if v == '?' or v == '':
                     datum.append(numpy.nan)
                 elif re.match(r'[+-]?[0-9]*(?:\.[0-9]*(?:[eE]-?[0-9]+)?)?', v):
-                    datum.append(float(v))
+                    try:    
+                        datum.append(int(v))
+                    except ValueError:
+                        datum.append(float(v))
                 else:
                     self.__print_warning('non-numeric value %s for numeric attribute %s' % (v, n))
                     return

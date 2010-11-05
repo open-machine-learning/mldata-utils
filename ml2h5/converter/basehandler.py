@@ -4,8 +4,6 @@ from scipy.sparse import csc_matrix
 from ml2h5 import VERSION_MLDATA
 from ml2h5.converter import ALLOWED_SEPERATORS
 
-from gettext import gettext as _
-
 
 class BaseHandler(object):
     """Base handler class.
@@ -70,7 +68,6 @@ class BaseHandler(object):
         A=val
         out=[]
         dt = h5py.special_dtype(vlen=str)
-
         if type(A)==csc_matrix: # sparse
             out.append((path+'_indices', A.indices))
             out.append((path+'_indptr', A.indptr))
@@ -128,7 +125,6 @@ class BaseHandler(object):
         @rtype: numpy.int32/numpy.double/self.str_type
         """
         dtype = None
-
         for v in values:
             if isinstance(v, int):
                 dtype = numpy.int32
@@ -200,7 +196,8 @@ class BaseHandler(object):
                 except:
                     pass
                 contents['data'][name] = d
-
+        if self.merge:
+            contents=self._get_merged(contents)    
         h5.close()
         return contents
 
@@ -241,7 +238,7 @@ class BaseHandler(object):
             if len(val) < 1: continue
 
             t = type(val[0])
-            if t == numpy.int32:
+            if t in [numpy.int32, numpy.int64]:
                 if merging == 'int':
                     merged[path].append(val)
                 else:
