@@ -20,8 +20,7 @@ def oParse():
     parser.add_option('-m', '--merge-data',action='store_true',dest='merge',help='',default=False)
     parser.add_option('-n', '--no-conversion',action='store_false',dest='convert',help='',default=True)
     
-    return parser.parse_args()
-
+    return parser
 
 def usage():
     msg = [ml2h5.PROGRAM_NAME + ', Version ' + ml2h5.VERSION + """
@@ -135,12 +134,12 @@ def parse_options():
 
 if __name__ == "__main__":
 #    parse_options()
-    (Options,args)=oParse()
-    argc = len(sys.argv)
-    if  argc < 3:
-        usage()
-        sys.exit(1)
+    op=oParse()
+    (Options,args)=op.parse_args()
 
+    if len(args)==0:
+        op.print_help()
+        sys.exit(1)
 #    if sys.argv[2] == 'h5':
     if args[1] == 'h5':
         seperator = None
