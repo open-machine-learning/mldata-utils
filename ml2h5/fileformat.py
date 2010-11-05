@@ -130,7 +130,6 @@ def infer_seperator(fname):
     except:
         return None
 
-    print fname
     seperator = None
     minimum = 1
 

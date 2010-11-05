@@ -322,12 +322,9 @@ def get_attribute_types(fname):
     try:
         h5 = h5py.File(fname, 'r')
         for o in h5['/data_descr/ordering']:
-            print o
             try:
                 types += h5['/data_descr/types'][o]
             except:
-                print "except"
-                print str(h5['/data/'][o].dtype)
                 types.add(str(h5['/data/'][o].dtype))
 
         h5.close()
