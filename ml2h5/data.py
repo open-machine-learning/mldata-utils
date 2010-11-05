@@ -319,14 +319,27 @@ def _find_dset(fname, output_variables):
 
 def get_attribute_types(fname):
     types=set()
+    dt = h5py.special_dtype(vlen=str)
     try:
         h5 = h5py.File(fname, 'r')
         for o in h5['/data_descr/ordering']:
-            try:
-                types += h5['/data_descr/types'][o]
-            except:
-                types.add(str(h5['/data/'][o].dtype))
-
+            indptr_name='/data/' + o + '_indptr'
+            indices_name='/data/' + o + '_indices'
+            if indptr_name in h5 and indices_name in h5:
+                types += 'Sparse Matrix'
+            else:
+                try:
+                    types += h5['/data_descr/types'][o]
+                except:
+                    t=h5['/data/'][o].dtype
+                    if t==dt:
+                        types.add("String")
+                    elif t in (numpy.int64, numpy.int32):
+                        types.add("Integer")
+                    elif t in (numpy.float64, numpy.float32):
+                        types.add("Floating Point")
+                    else:
+                        types.add(str(t))
         h5.close()
     except:
         pass
