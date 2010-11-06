@@ -281,8 +281,8 @@ def _find_dset(fname, output_variables):
     ov = output_variables
     for name in h5['/data_descr/ordering']:
         path = '/data/' + name
-        path_indptr = dset+'_indptr'
-        path_indices = dset+'_indices'
+        path_indptr = path+'_indptr'
+        path_indices = path+'_indices'
 
         if path_indptr in h5['/data'] and path_indices in h5['/data']:
             A = csc_matrix(
