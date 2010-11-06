@@ -210,7 +210,7 @@ def can_convert_h5_to(dst_type, h5_filename=None):
 
             if dst_type=='libsvm': # libsvm requires data/label
                 ordering=set(('label','data'))
-                if ordering.issubset(set(h5['data'].keys()))
+                if ordering.issubset(set(h5['data'].keys())):
                     return True # TODO check if this is sparse data / ndarray data
             elif dst_type in ('csv', 'arff'): # csv/arff support everything except sparse data
                 for k in h5['data'].keys():
