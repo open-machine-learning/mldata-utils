@@ -40,6 +40,8 @@ class ConversionError(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
+    def print_error(self):
+        print self.value
 
 
 class Converter(object):
@@ -155,6 +157,11 @@ class Converter(object):
                         if str(Ai[j]) != str(Bi[j]):
                             return False
         else:
+            if type(A) == numpy.ndarray and \
+               type(B) == numpy.ndarray and \
+               A.shape != B.shape:
+                   return False
+
             for j in xrange(len(A)):
                 try:
                     if abs(A[j] - B[j]) > EPSILON:
@@ -184,7 +191,7 @@ class Converter(object):
             name_out = data_out['ordering'][i]
             if not self._compare(data_in['data'][name_in], data_out['data'][name_out]):
                 raise ConversionError(
-                    'Verification failed! Data of %s != %s' % (self.fname_in, self.fname_out)
+                    'Verification failed! Data of %s != %s ("%s" not matching "%s")' % (self.fname_in, self.fname_out, name_in, name_out)
             )
 
         return True

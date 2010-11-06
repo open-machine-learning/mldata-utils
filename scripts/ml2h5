@@ -158,5 +158,9 @@ if __name__ == "__main__":
     )
     if Options.convert:
         c.run(verify=Options.verify)
-    if Options.verify:
-        c.verify()    
+    try:
+        if Options.verify:
+            c.verify()    
+    except ml2h5.converter.ConversionError, e:
+        e.print_error()
+        sys.exit(1)
