@@ -1,7 +1,14 @@
 #!/bin/bash
 
 set -e
-for d in bodyfat.h5 friedman-datasets-fri_c2_100_50.arff C_elegans_acc_seq.arff iris.libsvm.h5.csv friedman-datasets-fri_c2_100_50.arff.h5 auto-mpg.uci.h5 
+for d in uci-20070111-zoo.h5 \
+	uci-20070111-zoo.arff \
+	bodyfat.h5 \
+	friedman-datasets-fri_c2_100_50.arff \
+	C_elegans_acc_seq.arff \
+	iris.libsvm.h5.csv \
+	friedman-datasets-fri_c2_100_50.arff.h5 \
+	auto-mpg.uci.h5
 do
 	echo -n "checking data set $d"
 	for type in .oct .csv .arff .mat 
@@ -10,11 +17,11 @@ do
 		echo -n "$type "
 
 		echo -n 1.. 
-		PYTHONPATH=.. python ../scripts/ml2h5conv $d tmp/${d}${type}
+		PYTHONPATH=.. python ../scripts/ml2h5 $d tmp/${d}${type}
 		echo -n 2..
-		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/${d}${type} tmp/${d}
+		PYTHONPATH=.. python ../scripts/ml2h5 tmp/${d}${type} tmp/${d}
 		echo -n 3..
-		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/${d} tmp/${d}2${type}
+		PYTHONPATH=.. python ../scripts/ml2h5 tmp/${d} tmp/${d}2${type}
 		if cmp --quiet tmp/${d}${type} tmp/${d}2${type}
 		then
 			echo -n OK
@@ -51,11 +58,11 @@ do
 		echo -n " $type "
 
 		echo -n 1..
-		PYTHONPATH=.. python ../scripts/ml2h5conv $d tmp/${d}${type}
+		PYTHONPATH=.. python ../scripts/ml2h5 $d tmp/${d}${type}
 		echo -n 2..
-		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/${d}${type} tmp/${d}
+		PYTHONPATH=.. python ../scripts/ml2h5 tmp/${d}${type} tmp/${d}
 		echo -n 3..
-		PYTHONPATH=.. python ../scripts/ml2h5conv tmp/${d} tmp/${d}2${type}
+		PYTHONPATH=.. python ../scripts/ml2h5 tmp/${d} tmp/${d}2${type}
 		if cmp --quiet tmp/${d}${type} tmp/${d}2${type}
 		then
 			echo -n OK
