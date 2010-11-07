@@ -14,7 +14,6 @@ AUTODETECTION_MAXBUFLEN=1*1024*1024
 import os, sys, numpy, h5py
 from gettext import gettext as _
 from scipy.sparse import csc_matrix
-#from decimal import Decimal, InvalidOperation
 
 import ml2h5.fileformat
 from h5_arff import H5_ARFF
@@ -116,11 +115,8 @@ class Converter(object):
             os.remove(self.fname_out)
 
         try:
-                
             data = self.handler_in.read()
             self.handler_out.write(data)
-#            if verify:
-#                self.verify()
         except Exception, e: # reformat all exceptions to ConversionError
             raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
 
