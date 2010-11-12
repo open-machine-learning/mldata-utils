@@ -120,39 +120,59 @@ def init_svm(task_type, kernel, labels):
 
     return svm
 
-def mlprocess(task_filename, data_filename, pred_filename):
-    """Demo of creating machine learning process."""
-
-    df = BaseHandler(data_filename)
+def parse_task(task_filename):
+    """Manually parse the task file"""
     tf = h5py.File(task_filename,'r')
 
+    task_type = tf['task_descr']['type'].value
     fidx = tf['task']['input_variables'].value
     lidx = tf['task']['output_variables'].value
     train_idx = tf['task']['train_idx'].value
     test_idx = tf['task']['test_idx'].value
-    task_type = tf['task_descr']['type'].value
 
-    all_data = array(df.read()['data'])
+    return task_type, fidx, lidx, train_idx, test_idx
+
+def parse_data(data_filename):
+    """Manually parse the data file"""
+    df = BaseHandler(data_filename)
+    all_data = df.read_data_as_array()
+    return all_data
+
+def _split_data(cur_data, fidx, lidx):
+    """Split data into examples and labels"""
+    fm = cur_data[:,fidx].T
+    ex = zeros(fm.shape)
+    for ridx in range(fm.shape[0]):
+        for cidx in range(fm.shape[1]):
+            ex[ridx,cidx] = float(fm[ridx,cidx])
+    lab = cur_data[:,lidx]
+
+    return ex, lab
+
+def split_data(all_data, fidx, lidx, train_idx, test_idx):
+    """Split array all_data into training and testing sets,
+    as well as examples and labels"""
     train_data = all_data[train_idx]
-    fm_train = train_data[:,fidx].T
-    fm_train_real = zeros(fm_train.shape)
-    for ridx in range(fm_train.shape[0]):
-        for cidx in range(fm_train.shape[1]):
-            fm_train_real[ridx,cidx] = float(fm_train[ridx,cidx])
-
+    train_ex, train_lab = _split_data(train_data, fidx, lidx)
     test_data = all_data[test_idx]
-    fm_test = test_data[:,fidx].T
-    fm_test_real = zeros(fm_train.shape)
-    for ridx in range(fm_test.shape[0]):
-        for cidx in range(fm_test.shape[1]):
-            fm_test_real[ridx,cidx] = float(fm_test[ridx,cidx])
+    test_ex, test_lab = _split_data(test_data, fidx, lidx)
 
+    return train_ex, train_lab, test_ex, test_lab
+
+def mlprocess(task_filename, data_filename, pred_filename, verbose=True):
+    """Demo of creating machine learning process."""
+    task_type, fidx, lidx, train_idx, test_idx = parse_task(task_filename)
     outputs = init_output(task_type)
-    str_label = train_data[:,lidx]
-    label_train = outputs.str2label(str_label)
+    all_data = parse_data(data_filename)
+    train_ex, train_lab, test_ex, test_lab = split_data(all_data, fidx, lidx, train_idx, test_idx)
+    label_train = outputs.str2label(train_lab)
 
-    feats_train = RealFeatures(fm_train_real)
-    feats_test = RealFeatures(fm_test_real)
+    if verbose:
+        print 'Number of features: %d' % train_ex.shape[0]
+        print '%d training examples, %d test examples' % (len(train_lab), len(test_lab))
+
+    feats_train = RealFeatures(train_ex)
+    feats_test = RealFeatures(test_ex)
     width=100.0
     kernel=GaussianKernel(feats_train, feats_train, width)
     labels=Labels(label_train)
@@ -166,7 +186,6 @@ def mlprocess(task_filename, data_filename, pred_filename):
     pf = open(pred_filename, 'w')
     for pred in pred_label:
         pf.write(pred+'\n')
-
     pf.close()
 
 

@@ -1,3 +1,7 @@
+0.4.0 2010/11/12 by Cheng Soon Ong
+
+* Added clientapi to interact with mldata.org via python on a client.
+
 0.3.6 2010/08/27 by Sebastian Henschel <mldata@kodeaffe.de>
 
 * Added a fix when data.get_correct internally receives an array of array with

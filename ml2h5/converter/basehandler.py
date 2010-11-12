@@ -199,7 +199,20 @@ class BaseHandler(object):
         h5.close()
         return contents
 
-
+    def read_data_as_array(self):
+        """Read data from file, and return an array
+        
+        @return: an array with all data
+        @rtype: numpy ndarray
+        """
+        contents = self.read()
+        data = contents['data']
+        ordering = contents['ordering']
+        data_array = numpy.zeros((0,data[ordering[0]].shape[1]))
+        for cur_feat in ordering:
+            data_array = numpy.vstack([data_array, data[cur_feat]])
+        return data_array.T
+        
 
     def _get_merged(self, data):
         """Merge given data where appropriate.
