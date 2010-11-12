@@ -26,3 +26,19 @@ LIBSVM
 works for all even multi-label data sets, however slurping failed for
 
 mediamill (exp1) data set (empty labels are not handled)
+
+
+CLIENT API
+==========
+
+- migrate code to mldata-utils backend
+
+- use ml2h5.converter.basehandler is the class to load h5 files
+  Only works for Data?
+
+- Get list of all Tasks from mldata.org
+
+- Use as a testing/validation tool
+
+- Does it make sense to use abstract base classes (abc)?
+  http://www.doughellmann.com/PyMOTW/abc/
