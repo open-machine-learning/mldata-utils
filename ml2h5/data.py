@@ -190,7 +190,7 @@ def get_unparseable(fname):
         data = ', '.join(f.getnames())
         f.close()
     else:
-        intro = 'Unparseable Data'
+        intro = 'Format not HDF5, zip or tar archive. Will parse the following text:'
         if is_binary(fname):
             data = ''
         else:
