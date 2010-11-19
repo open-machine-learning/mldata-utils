@@ -73,7 +73,7 @@ def _get_extract_data(h5):
                 indices = h5[dset_indices][:h5[dset_indptr][NUM_EXTRACT+1]]
                 indptr = h5[dset_indptr][:NUM_EXTRACT+1]
                 A=csc_matrix((data, indices, indptr)).todense()
-                extract.append(A[:NUM_EXTRACT].tolist())
+                extract.extend(A[:NUM_EXTRACT].tolist())
             else:
                 if type(h5[dset][0]) == numpy.ndarray:
                     last = len(h5[dset][0])
