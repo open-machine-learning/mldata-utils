@@ -147,12 +147,6 @@ def update_description(h5, task):
     update_object(group, 'urls', _encode(task.urls))
     update_object(group, 'publications',\
         ''.join([_encode(p.title) for p in task.publications.all()]))
-    update_object(group, 'is_public', _encode(task.is_public))
-    update_object(group, 'is_deleted', _encode(task.is_deleted))
-    update_object(group, 'is_current', _encode(task.is_current))
-    update_object(group, 'user', _encode(task.user.username))
-    update_object(group, 'downloads', task.downloads)
-    update_object(group, 'hits', task.hits)
 
     update_object(group, 'input', _encode(task.input))
     update_object(group, 'output', _encode(task.output))
@@ -215,9 +209,9 @@ def create(fname, task, taskfile=None):
         return False
 
 
-    update_object(h5, 'name', _encode(task.name))
-    update_object(h5, 'mldata', VERSION_MLDATA)
-    update_object(h5, 'comment', 'Task file')
+    h5.attrs['name'] = _encode(task.name)
+    h5.attrs['mldata'] = VERSION_MLDATA
+    h5.attrs['comment'] = 'Task file'
 
     error = False
     if not update_description(h5, task):
@@ -260,7 +254,7 @@ def get_extract(fname):
 
     #   reduce train and test split string   
     for dset in ['train_idx','test_idx','input_variables','output_variables']:
-	if dset in extract:
+        if dset in extract:
             extract[dset] = reduce_split_str(extract[dset])
 
     return extract
@@ -283,7 +277,7 @@ def get_split_image(fname):
     if len(extract['train_idx'].shape)==1:
         dim=1
     else:
-	dim=extract['train_idx'].shape[0]
+        dim=extract['train_idx'].shape[0]
     image_data=numpy.zeros([max(extract['train_idx'][-1],extract['test_idx'][-1])+1,dim])
     image_data[extract['train_idx']]=1
     image_data[extract['test_idx']]=2
