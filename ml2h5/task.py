@@ -243,18 +243,25 @@ def get_extract(fname):
     except:
         return extract
 
-    dsets = ['train_idx', 'test_idx', 'input_variables', 'output_variables']
-    for dset in dsets:
-        path = '/task/' + dset
-        if path in h5:
-            extract[dset] = h5[path][...]
+    form_fields = ['train_idx', 'test_idx', 'input_variables', 'output_variables',
+                   'performance_measure','type']
+
+    #dsets = ['train_idx', 'test_idx', 'input_variables', 'output_variables']
+    #for dset in dsets:
+    #    path = '/task/' + dset
+    #    if path in h5:
+    #        extract[dset] = h5[path][...]
+    for toplevel in ['task','task_descr']:
+        for cur_item in h5[toplevel].iteritems():
+            if cur_item[0] in form_fields:
+                extract[cur_item[0]] = cur_item[1][...]
 
     h5.close()
 
-#   reduce train and test split string   
+    #   reduce train and test split string   
     for dset in ['train_idx','test_idx','input_variables','output_variables']:
 	if dset in extract:
-		extract[dset] = reduce_split_str(extract[dset])
+            extract[dset] = reduce_split_str(extract[dset])
 
     return extract
 
