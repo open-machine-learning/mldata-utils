@@ -419,10 +419,11 @@ class H5_OCTAVE(BaseHandler):
 
 
     def write(self, data):
+        group=self.get_data_group(data)
         of = open(self.fname,'w')
         of.writelines(self._oct_header())
         for o in data['ordering']:
-            self._print_meta(of,data['data'][o], o)
-            self._print_data(of,data['data'][o])
+            self._print_meta(of,data[group][o], o)
+            self._print_data(of,data[group][o])
 
         of.close()

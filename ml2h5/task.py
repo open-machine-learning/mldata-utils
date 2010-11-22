@@ -11,6 +11,10 @@ from indexsplit import reduce_split_str
 
 COMPRESSION = None
 
+task_data_fields = ['train_idx', 'test_idx', 'input_variables', 'output_variables']
+task_descr_fields = ['performance_measure','type']
+
+
 def update_object(h5, name, value):
     if name in h5.keys():
         del h5[name]
@@ -162,13 +166,13 @@ def update_description(h5, task):
 
 
 
-def update_data(h5, taskfile=None):
+def update_data(h5, taskinfo=None):
     """Update data group in Task file.
 
     @param h5: opened HDF5 file
     @type h5: h5py.File
-    @param taskfile: data to write to Task file
-    @type taskfile: dict with indices train_idx, test_idx, input_variables, output_variables
+    @param taskinfo: data to write to Task file
+    @type taskinfo: dict with indices train_idx, test_idx, input_variables, output_variables
     @return: if update was successful
     @rtype: boolean
     """
@@ -177,26 +181,26 @@ def update_data(h5, taskfile=None):
     else:
         group = h5['task']
 
-    if not taskfile:
+    if not taskinfo:
         return True
 
-    for name in taskfile:
-        if taskfile[name] is not None:
+    for name in taskinfo:
+        if taskinfo[name] is not None:
             if name in group: del group[name]
-            group.create_dataset(name, data=taskfile[name])
+            group.create_dataset(name, data=taskinfo[name])
 
     return True
 
 
-def create(fname, task, taskfile=None):
+def update_or_create(fname, task, taskinfo=None):
     """Update or create Task file with data from given Task object.
 
     @param fname: full path of Task filename
     @type fname: string
     @param task: Task object as of mldata.org
     @type task: repository.Task
-    @param taskfile: data to write to Task file
-    @type taskfile: dict with indices train_idx, test_idx, input_variables, output_variables
+    @param taskinfo: data to write to Task file
+    @type taskinfo: dict with indices train_idx, test_idx, input_variables, output_variables
     @return: if file could be updated / created
     @rtype: boolean
     """
@@ -216,7 +220,7 @@ def create(fname, task, taskfile=None):
     error = False
     if not update_description(h5, task):
         error = True
-    if not update_data(h5, taskfile):
+    if not update_data(h5, taskinfo):
         error = True
 
     h5.close()
@@ -237,25 +241,12 @@ def get_extract(fname):
     except:
         return extract
 
-    form_fields = ['train_idx', 'test_idx', 'input_variables', 'output_variables',
-                   'performance_measure','type']
-
-    #dsets = ['train_idx', 'test_idx', 'input_variables', 'output_variables']
-    #for dset in dsets:
-    #    path = '/task/' + dset
-    #    if path in h5:
-    #        extract[dset] = h5[path][...]
-    for toplevel in ['task','task_descr']:
-        for cur_item in h5[toplevel].iteritems():
-            if cur_item[0] in form_fields:
-                extract[cur_item[0]] = cur_item[1][...]
+    for t in task_data_fields:
+        extract[t]=reduce_split_str(h5['task'][t][...])
+    for t in task_descr_fields:
+        extract[t]=h5['task_descr'][t][...]
 
     h5.close()
-
-    #   reduce train and test split string   
-    for dset in ['train_idx','test_idx','input_variables','output_variables']:
-        if dset in extract:
-            extract[dset] = reduce_split_str(extract[dset])
 
     return extract
 

@@ -73,7 +73,9 @@ class H5_ARFF(BaseHandler):
             raise ml2h5.converter.ConversionError("Sparse matrices are not supported in ARFF files")
 
     def write(self, data):
-        self.check_sparse(data['data'])
+        group=self.get_data_group(data)
+        d=data[group]
+        self.check_sparse(d)
 
         af = arff.ArffFile()
         af.data = self.get_data_as_list(data)
@@ -84,14 +86,14 @@ class H5_ARFF(BaseHandler):
             idx=0
             for o in data['ordering']:
                 try:
-                    if len(data['data'][o].shape)==1:
+                    if len(d[o].shape)==1:
                         num=1
                     else:
-                        num=data['data'][o].shape[0]
+                        num=d[o].shape[0]
 
-                    if data['data'][o].dtype == numpy.double:
+                    if d[o].dtype == numpy.double:
                         prefix='double'
-                    elif data['data'][o].dtype in [numpy.int32, numpy.int64 ]:
+                    elif d[o].dtype in [numpy.int32, numpy.int64 ]:
                         prefix='int'
                     else:
                         prefix='str'

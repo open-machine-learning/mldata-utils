@@ -61,7 +61,8 @@ class H5_MAT(BaseHandler):
 
 
     def write(self, data):
-        d=data['data']
+        group=self.get_data_group(data)
+        d=data[group]
         for k in d.keys():
             if type(d[k])==list and len(d[k])>0 and type(d[k][0])==str:
                 cell = array([ numpy.array(unicode(i)) for i in d[k] ], dtype=numpy.object)

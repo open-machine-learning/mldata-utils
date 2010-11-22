@@ -1,6 +1,7 @@
 import os, h5py, numpy
 from scipy.sparse import csc_matrix
 
+import ml2h5.task
 from ml2h5 import VERSION_MLDATA
 from ml2h5.converter import ALLOWED_SEPERATORS
 
@@ -83,15 +84,17 @@ class BaseHandler(object):
 
         dl=[]
 
+        group=self.get_data_group(data)
+
         lengths=dict()
         for o in data['ordering']:
-            x=data['data'][o]
+            x=data[group][o]
             #if numpy.issubdtype(x.dtype, numpy.int):
-            #    data['data'][o]=x.astype(numpy.float64)
+            #    data[group][o]=x.astype(numpy.float64)
             try:
-                lengths[o]=data['data'][o].shape[1]
+                lengths[o]=data[group][o].shape[1]
             except (AttributeError, IndexError):
-                lengths[o]=len(data['data'][o])
+                lengths[o]=len(data[group][o])
         l=set(lengths.values())
         assert(len(l)==1)
         l=l.pop()
@@ -100,9 +103,9 @@ class BaseHandler(object):
             line=[]
             for o in data['ordering']:
                 try:
-                    line.extend(data['data'][o][:,i])
+                    line.extend(data[group][o][:,i])
                 except:
-                    line.append(data['data'][o][i])
+                    line.append(data[group][o][i])
             dl.append(line)
         return dl
 
@@ -115,6 +118,17 @@ class BaseHandler(object):
         # without str() it might barf
         return str(os.path.basename(self.fname).split('.')[0])
 
+    def get_data_group(self, data):
+        if data and data.has_key('group'):
+            return data['group']
+        else:
+            return 'data'
+
+    def get_descr_group(self, data):
+        if data and data.has_key('group'):
+            return data['group'] + '_descr'
+        else:
+            return 'data_descr'
 
     def get_datatype(self, values):
         """Get data type of given values.
@@ -158,44 +172,44 @@ class BaseHandler(object):
         h5 = h5py.File(self.fname, 'r')
 
         contents = {
-            'ordering': h5['/data_descr/ordering'][...].tolist(),
             'name': h5.attrs['name'],
             'comment': h5.attrs['comment'],
             'mldata': h5.attrs['mldata'],
-            'data': dict(),
         }
 
-        if '/data_descr/names' in h5:
-           contents['names']=h5['/data_descr/names'][...].tolist()
+        if contents['comment']=='Task file':
+            contents['task']=dict()
+            contents['ordering']=ml2h5.task.task_data_fields
+            group='task'
+        else:
+            contents['data']=dict()
+            contents['ordering']=h5['/data_descr/ordering'][...].tolist()
+            group='data'
 
-        if '/data_descr/types' in h5:
-            contents['types'] = h5['/data_descr/types'][...]
+        contents['group']=group
+
+        if '/%s_descr/names' % group in h5:
+           contents['names']=h5['/%s_descr/names' % group][...].tolist()
+
+        if '/%s_descr/types' % group in h5:
+            contents['types'] = h5['/%s_descr/types' % group ][...]
 
         for name in contents['ordering']:
-            vname='/data/' + name
+            vname='/%s/%s' % (group, name)
             sp_indices=vname+'_indices'
             sp_indptr=vname+'_indptr'
 
-            if sp_indices in h5['/data'] and sp_indptr in h5['/data']:
-                contents['data'][name] = csc_matrix((h5[vname], h5[sp_indices], h5[sp_indptr])
+            if sp_indices in h5['/%s' % group] and sp_indptr in h5['/%s' % group]:
+                contents[group][name] = csc_matrix((h5[vname], h5[sp_indices], h5[sp_indptr])
             )
             else:
                 d = numpy.array(h5[vname],order='F')
 
                 try:
                     d=d['vlen']
-                    #x=d['vlen']
-                    #cell=[]
-                    #for i in x:
-                    #    if len(i):
-                    #        cell.append(unicode(i))
-                    #    else:
-                    #        cell.append(u'')
-                    #d=cell
-                    #d=x
                 except:
                     pass
-                contents['data'][name] = d
+                contents[group][name] = d
         h5.close()
         return contents
 
@@ -206,7 +220,8 @@ class BaseHandler(object):
         @rtype: numpy ndarray
         """
         contents = self.read()
-        data = contents['data']
+        group = self.get_data_group(data)
+        data = contents[group]
         ordering = contents['ordering']
         data_array = numpy.zeros((0,data[ordering[0]].shape[1]))
         for cur_feat in ordering:
@@ -230,8 +245,10 @@ class BaseHandler(object):
         path = ''
         idx = 0
         merging = None
+        group = self.get_data_group(data)
+
         for name in data['ordering']:
-            val = data['data'][name]
+            val = data[group][name]
 
             if type(val) == csc_matrix:
                 merging = None
@@ -276,11 +293,11 @@ class BaseHandler(object):
                     path = name
                 ordering.append(path)
                 merged[path] = val
-        data['data'] = {}        
+        data[group] = {}        
         for k in merged:
             if len(merged[k])==1:
                 merged[k] = merged[k][0]    
-            data['data'][k] = numpy.array(merged[k])
+            data[group][k] = numpy.array(merged[k])
         data['ordering'] = ordering
         return data
 
@@ -297,14 +314,17 @@ class BaseHandler(object):
         h5.attrs['mldata'] = VERSION_MLDATA
         h5.attrs['comment'] = data['comment']
 
+        group = self.get_data_group(data)
+        descr_group = self.get_data_group(data)
+
         try:
 
-            group = h5.create_group('/data')
-            for path, val in data['data'].iteritems():
+            group = h5.create_group('/%s' % group)
+            for path, val in data[group].iteritems():
                 for path, val in self._convert_to_ndarray(path,val):
                     group.create_dataset(path, data=val, compression=self.compression)
 
-            group = h5.create_group('/data_descr')
+            group = h5.create_group('/%s' % descr_group)
             names = numpy.array(data['names']).astype(self.str_type)
             if names.size > 0: # simple 'if names' throws exception if array
                 group.create_dataset('names', data=names, compression=self.compression)

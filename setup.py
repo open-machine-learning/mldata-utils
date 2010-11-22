@@ -1,13 +1,13 @@
 from distutils.core import setup
 
-VERSION='0.4.0'
+VERSION='0.4.1'
 DESCRIPTION='Utilities around hdf5 and for compute performance measures',
 LONG_DESCRIPTION="""
-Utility functions to perform evaluations and to convert from/to the hdf5 based mldata format into/from typical machine learning formats like .csv,.arff,.octave,.mat. This code is actually used on mldata.org to perform the evaluations and data conversions.
+Utility functions to perform evaluations and to convert from/to the hdf5 based mldata format into/from typical machine learning formats like .csv,.arff,.octave,.mat. This code is actually used on mldata.org to perform the evaluations and data and task conversions.
 """
-AUTHOR = ['Sebastian Henschel', 'Mikio Braun', 'Hagen Zahn','Cheng Soon Ong', 'Soeren Sonnenburg']
-AUTHOR_EMAIL = ['mldata@kodeaffe.de', 'mikio@cs.tu-berlin.de', 'hzahn@informatik.hu-berlin.de',
-                'chengsoon.ong@inf.ethz.ch', 'Soeren.Sonnenburg@tu-berlin.de']
+AUTHOR = ['Soeren Sonnenburg', 'Sebastian Henschel', 'Mikio Braun', 'Hagen Zahn','Cheng Soon Ong']
+AUTHOR_EMAIL = ['Soeren.Sonnenburg@tu-berlin.de', 'mldata@kodeaffe.de',
+        'mikio@cs.tu-berlin.de', 'hzahn@informatik.hu-berlin.de', 'chengsoon.ong@inf.ethz.ch']
 URL = 'http://mloss.org/software/view/262/'
 
 LICENSE = """
