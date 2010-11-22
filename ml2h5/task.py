@@ -242,9 +242,15 @@ def get_extract(fname):
         return extract
 
     for t in task_data_fields:
-        extract[t]=reduce_split_str(h5['task'][t][...])
+		try:
+			extract[t]=reduce_split_str(h5['task'][t][...])
+		except KeyError:
+			pass
     for t in task_descr_fields:
-        extract[t]=h5['task_descr'][t][...]
+		try:
+			extract[t]=h5['task_descr'][t][...]
+		except KeyError:
+			pass
 
     h5.close()
 
