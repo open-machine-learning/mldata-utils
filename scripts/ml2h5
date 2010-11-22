@@ -14,6 +14,7 @@ def oParse():
     parser.add_option('-s','--seperator',dest='seperator',help='Seperator to use to seperate variables in examples. Default is ","',default=None)
     parser.add_option('-v', '--verify',action='store_true',dest='verify',help='Verify the converted data',default=False)
     parser.add_option('-f', '--first-line-attribute-names',action='store_true',dest='attribute_names_first',help='First line contains attributes names (for CSV)',default=False)
+    parser.add_option('-t', '--type',dest='type',help='File type to convert, can either be data or task',default='data')
     parser.add_option('-i', '--format-in',dest='format_in',help='File format of in-file (if auto-detection fails)',default=None)
     parser.add_option('-o', '--format-out',dest='format_out',help='File format of out-file (if auto-detection fails)',default=None)
     parser.add_option('-m', '--merge-data',action='store_true',dest='merge',help='',default=False)
@@ -57,6 +58,7 @@ class Options:
     format_in = None
     format_out = None
     merge = False
+    type = None
 
 
 def rm_opt(option, value=None):
@@ -101,7 +103,8 @@ if __name__ == "__main__":
             format_in=Options.format_in, format_out=Options.format_out,
             seperator=seperator,
             attribute_names_first=Options.attribute_names_first,
-            merge=Options.merge
+            merge=Options.merge,
+            type=Options.type
         )
         if Options.convert:
             c.run(verify=Options.verify)

@@ -12,6 +12,7 @@ EPSILON = 1e-15
 AUTODETECTION_MAXBUFLEN=1*1024*1024
 
 import os, sys, numpy, h5py
+import subprocess
 from gettext import gettext as _
 from scipy.sparse import csc_matrix
 
@@ -60,7 +61,12 @@ class Converter(object):
     @type handler_out: derivate of BaseHandler
     """
 
-    def __init__(self, fname_in, fname_out, format_in=None, format_out=None, seperator=None, attribute_names_first=False,merge=True):
+    def __init__(self, fname_in, fname_out,
+            format_in=None, format_out=None,
+            seperator=None,
+            attribute_names_first=False,
+            merge=True,
+            type='data'):
         """
         @param fname_in: name of in-file
         @type fname_in: string
@@ -77,6 +83,7 @@ class Converter(object):
         """
         self.fname_in = fname_in
         self.fname_out = fname_out
+        self.type = type
         if format_in:
             self.format_in = format_in
         else:
@@ -85,6 +92,11 @@ class Converter(object):
             self.format_out = format_out
         else:
             self.format_out = ml2h5.fileformat.get(fname_out)
+
+
+        # handle h5 -> xml via h5dump
+        if self.format_in == 'h5' and self.format_out == 'xml':
+            return
 
         try:
             self.handler_in = HANDLERS[self.format_in](fname_in, seperator,merge=merge)
@@ -115,8 +127,13 @@ class Converter(object):
             os.remove(self.fname_out)
 
         try:
-            data = self.handler_in.read()
-            self.handler_out.write(data)
+            if self.format_in == 'h5' and self.format_out == 'xml':
+                cmd = 'h5dump --xml ' + self.fname_in + ' > ' + self.fname_out
+                if not subprocess.call(cmd, shell=True) == 0:
+                    raise ConversionError, 'Failed conversion of %s to XML' % (self.fname_in)
+            else:
+                data = self.handler_in.read()
+                self.handler_out.write(data)
         except Exception, e: # reformat all exceptions to ConversionError
             raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
 
