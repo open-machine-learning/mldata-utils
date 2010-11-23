@@ -199,9 +199,7 @@ def get_taskinfo(fname):
                                                 octave, h5) are supported'
     try:
         c = ml2h5.converter.Converter(fname,
-                '/tmp/dummy_does_not_exist.h5', format_in=format)
-        import pdb
-        pdb.set_trace()
+                '/tmp/dummy_does_not_exist.h5', format_in=format, format_out='h5', attribute_names_first=False, merge=False, type='data')
         data = c.read()
 
         for g in ('data','task'):

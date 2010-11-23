@@ -314,13 +314,12 @@ class BaseHandler(object):
         h5.attrs['mldata'] = VERSION_MLDATA
         h5.attrs['comment'] = data['comment']
 
-        group = self.get_data_group(data)
-        descr_group = self.get_data_group(data)
+        data_group = self.get_data_group(data)
+        descr_group = self.get_descr_group(data)
 
         try:
-
-            group = h5.create_group('/%s' % group)
-            for path, val in data[group].iteritems():
+            group = h5.create_group('/%s' % data_group)
+            for path, val in data[data_group].iteritems():
                 for path, val in self._convert_to_ndarray(path,val):
                     group.create_dataset(path, data=val, compression=self.compression)
 

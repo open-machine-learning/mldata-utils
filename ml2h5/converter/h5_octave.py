@@ -53,6 +53,9 @@ class H5_OCTAVE(BaseHandler):
             data=self._read_sparse_matrix(octf,meta['columns'],meta['rows'])
         elif meta['dtype']=='cell':
             data=self._read_cellarray(octf,meta['columns'],meta['rows'])
+        elif meta['dtype']=='string':
+            data=self._read_sq_string(octf,meta['length'],meta['elements'])
+
         elif meta['dtype']=='sq_string':
             data=self._read_sq_string(octf,meta['length'],meta['elements'])
         else:
@@ -217,10 +220,9 @@ class H5_OCTAVE(BaseHandler):
             'name': self.get_name(),
             'comment': 'octave',
             'names':[],
-            'ordering':names,
-            'data':data,
+            'ordering': names,
+            'data': data,
         }
-
 
 
     def _oct_header(self):
