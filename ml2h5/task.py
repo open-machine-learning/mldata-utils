@@ -191,6 +191,30 @@ def update_data(h5, taskinfo=None):
 
     return True
 
+def get_taskinfo(fname):
+    taskinfo = None
+    format = ml2h5.fileformat.get(fname)
+    if not format in ('matlab','h5','octave'):
+        raise ml2h5.converter.ConversionError, 'Format not supported (only matlab, \
+                                                octave, h5) are supported'
+    try:
+        c = ml2h5.converter.Converter(fname,
+                '/tmp/dummy_does_not_exist.h5', format_in=format)
+        import pdb
+        pdb.set_trace()
+        data = c.read()
+
+        for g in ('data','task'):
+            for f in task_data_fields:
+                if data.has_key(g) and data[g].has_key(f):
+                    if not taskinfo:
+                        taskinfo=dict()
+                    taskinfo[f]=data[g][f]
+
+    except ml2h5.converter.ConversionError:
+        pass
+
+    return taskinfo
 
 def update_or_create(fname, task, taskinfo=None):
     """Update or create Task file with data from given Task object.
@@ -242,15 +266,15 @@ def get_extract(fname):
         return extract
 
     for t in task_data_fields:
-		try:
-			extract[t]=reduce_split_str(h5['task'][t][...])
-		except KeyError:
-			pass
+        try:
+            extract[t]=reduce_split_str(h5['task'][t][...])
+        except KeyError:
+            pass
     for t in task_descr_fields:
-		try:
-			extract[t]=h5['task_descr'][t][...]
-		except KeyError:
-			pass
+        try:
+            extract[t]=h5['task_descr'][t][...]
+        except KeyError:
+            pass
 
     h5.close()
 

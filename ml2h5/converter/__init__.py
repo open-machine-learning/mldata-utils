@@ -112,6 +112,11 @@ class Converter(object):
         except Exception, e: # reformat all other exceptions to ConversionError
             raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
 
+    def read(self):
+        try:
+            return self.handler_in.read()
+        except Exception, e: # reformat all exceptions to ConversionError
+            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
 
     def run(self, verify=False, remove_out=True):
         """Convert to/from HDF5.
