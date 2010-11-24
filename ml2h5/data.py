@@ -4,12 +4,11 @@ Handle Data objects and files.
 This module heavily relies on the functionality required for http://mldata.org
 """
 
-import h5py, numpy, os, tarfile, zipfile, bz2, gzip
+import h5py, numpy, os, copy, tarfile, zipfile, bz2, gzip
 from scipy.sparse import csc_matrix
 
 import fileformat, converter
-from . import NUM_EXTRACT
-
+from . import NUM_EXTRACT, LEN_EXTRACT
 
 def get_num_instattr(fname):
     """Retrieve number of instances and number of attributes from given HDF5 file.
@@ -57,9 +56,19 @@ def _get_extract_data(h5):
     @return: data extract
     @rtype: list
     """
+    overlength=False
+    overwidth=False
+    cur_line=0
     extract = []
     try:
-        for dset in h5['/data_descr/ordering']:
+
+        for dset in list(h5['/data_descr/ordering']):
+
+            if cur_line==NUM_EXTRACT:
+                overwidth=True    
+                break 
+
+
             dset = '/data/' + dset
 
             dset_indptr = dset+'_indptr'
@@ -69,27 +78,77 @@ def _get_extract_data(h5):
                 # taking all data takes to long for quick viewing, but having just
                 # this extract may result in less columns displayed than indicated
                 # by attributes_names
-                data = h5[dset][:h5[dset_indptr][NUM_EXTRACT+1]]
+
+                # reduce columns
                 indices = h5[dset_indices][:h5[dset_indptr][NUM_EXTRACT+1]]
+                data = (h5[dset][:h5[dset_indptr][NUM_EXTRACT+1]])
                 indptr = h5[dset_indptr][:NUM_EXTRACT+1]
-                A=csc_matrix((data, indices, indptr)).todense()
-                extract.extend(A[:NUM_EXTRACT].tolist())
+                csc_shape = [min(NUM_EXTRACT,max(indices)),min(NUM_EXTRACT,len(indptr))]
+                if len(indptr)<len(h5[dset_indptr]):
+                    overlength=True
+                if any(indices > NUM_EXTRACT):
+                    overwidth=True    
+                # reduce rows
+
+                for i in xrange(len(indptr)-1):
+                    for j in range(indptr[i],indptr[i+1]):   
+                        if indices[j]>=NUM_EXTRACT:   
+                            indptr[i+1:]-=numpy.ones(len(indptr[i+1:]))
+                data=data[indices < NUM_EXTRACT]
+                indices=indices[indices < NUM_EXTRACT]
+
+                # empty array exemption
+                if data.shape==(0,) or indices.shape==(0,):
+                    data=numpy.array([0])
+                    indices=data
+                A=csc_matrix((data, indices, indptr),csc_shape).todense()
+                if A.shape[0]+cur_line > NUM_EXTRACT:
+                    extract.extend(A[:-cur_line].tolist())
+                else:
+                    extract.extend(A.tolist())
+
+                cur_line+=A.shape[0]
             else:
                 if type(h5[dset][0]) == numpy.ndarray:
                     last = len(h5[dset][0])
-                    if last > NUM_EXTRACT: last = NUM_EXTRACT
-                    for i in xrange(len(h5[dset])):
+                    if last > NUM_EXTRACT: 
+                        last = NUM_EXTRACT
+                        overlength=True
+                    app_lines=xrange(len(h5[dset]))
+                    if len(app_lines) + cur_line > NUM_EXTRACT: 
+                        app_lines = xrange(NUM_EXTRACT - cur_line )
+                        
+                    for i in app_lines:
                         extract.append(h5[dset][i][:last])
+                    cur_line+=len(app_lines)
                 else:
+                    cur_line+=1
                     last = len(h5[dset])
-                    if last > NUM_EXTRACT: last = NUM_EXTRACT
+                    if last > NUM_EXTRACT: 
+                        last = NUM_EXTRACT
+                        overlength=True
                     extract.append(h5[dset][:last])
-        extract = numpy.matrix(extract)
+        if overwidth:
+            extract.append(['...' for i in extract[0]])    
+        extract = numpy.matrix(extract).T
 
         # convert from numpy array to list, if necessary
         t = type(extract[0])
         if t == numpy.ndarray or t == numpy.matrix:
             extract = [y for x in extract for y in x.tolist()]
+        if overlength:
+            extract.append(['...' for i in extract[0]])        
+        # cut all values if necessary
+        for l in range(len(extract)):
+            for c in range(len(extract[l])):
+                extract[l][c]=str(extract[l][c])
+                if len(extract[l][c])>LEN_EXTRACT:
+                    if extract[l][c][0]=='-':
+                        extract[l][c]=extract[l][c][:LEN_EXTRACT-1]+'...'
+                    else:
+                        extract[l][c]=extract[l][c][:LEN_EXTRACT-2]+'...'
+    
+        
 
     except KeyError:
         pass
@@ -97,7 +156,6 @@ def _get_extract_data(h5):
         pass
     except IndexError:
         pass
-
     return extract
 
 
@@ -132,9 +190,14 @@ def get_extract(fname):
     for a in attrs:
         if a in h5.attrs:
             extract[a] = h5.attrs[a]
-
     if '/data_descr/names' in h5:
         extract['names'] = h5['/data_descr/names'][:].tolist()[:NUM_EXTRACT]
+        extract['names_cut'] = copy.copy(extract['names'])
+        for i in xrange(len(extract['names_cut'])):
+            if len(extract['names_cut'][i]) > LEN_EXTRACT: 
+                extract['names_cut'][i] = extract['names_cut'][i][:LEN_EXTRACT-2] + '...'
+        if len(list(h5['/data_descr/names'])) > NUM_EXTRACT:
+            extract['names_cut'].append('...')        
 
     if '/data_descr/types' in h5:
         extract['types'] = h5['/data_descr/types'][:].tolist()[:NUM_EXTRACT]
