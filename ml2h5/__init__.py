@@ -6,6 +6,6 @@ __all__ = ['task', 'data', 'fileformat', 'converter']
 VERSION_MLDATA = '0'
 NUM_EXTRACT = 10
 # maximum value length 
-LEN_EXTRACT = 7
+LEN_EXTRACT = 6
 PROGRAM_NAME='ml2h5'
 VERSION='0'

@@ -117,7 +117,7 @@ def _get_extract_data(h5):
                     app_lines=xrange(len(h5[dset]))
                     if len(app_lines) + cur_line > NUM_EXTRACT: 
                         app_lines = xrange(NUM_EXTRACT - cur_line )
-                        
+                        overwidth=True 
                     for i in app_lines:
                         extract.append(h5[dset][i][:last])
                     cur_line+=len(app_lines)
