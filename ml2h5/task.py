@@ -149,6 +149,9 @@ def update_description(h5, task):
     update_object(group, 'summary', _encode(task.summary))
     update_object(group, 'description', _encode(task.description))
     update_object(group, 'urls', _encode(task.urls))
+    # Without saving task, it does not have a primary key
+    #  and the following line complains
+    task.save()
     update_object(group, 'publications',\
         ''.join([_encode(p.title) for p in task.publications.all()]))
 
