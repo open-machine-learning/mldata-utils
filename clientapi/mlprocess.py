@@ -40,6 +40,7 @@ class OutputsBinClass(OutputsClassification):
     def init_id(self, str_label):
         """Discover the names of the labels"""
         all_names = unique(str_label)
+        all_names = map(str, all_names)
         assert(len(all_names) == 2)
         self.name2id = {all_names[0]: 1,
                         all_names[1]: -1,
@@ -64,6 +65,7 @@ class OutputsMultiClass(OutputsClassification):
     def init_id(self, str_label):
         """Discover the names of the labels"""
         all_names = unique(str_label)
+        all_names = map(str, all_names)
         assert(len(all_names) > 2)
         self.name2id = {}
         self.id2name = {}
@@ -173,7 +175,7 @@ def mlprocess(task_filename, data_filename, pred_filename, verbose=True):
 
     feats_train = RealFeatures(train_ex)
     feats_test = RealFeatures(test_ex)
-    width=100.0
+    width=1.0
     kernel=GaussianKernel(feats_train, feats_train, width)
     labels=Labels(label_train)
     svm = init_svm(task_type, kernel, labels)

@@ -220,10 +220,14 @@ class BaseHandler(object):
         @rtype: numpy ndarray
         """
         contents = self.read()
-        group = self.get_data_group(data)
-        data = contents[group]
+        #group = self.get_data_group(data)
+        data = contents['data']
         ordering = contents['ordering']
-        data_array = numpy.zeros((0,data[ordering[0]].shape[1]))
+        if len(data[ordering[0]].shape)>1:
+            num_examples = data[ordering[0]].shape[1]
+        else:
+            num_examples = len(data[ordering[0]])
+        data_array = numpy.zeros((0, num_examples))
         for cur_feat in ordering:
             data_array = numpy.vstack([data_array, data[cur_feat]])
         return data_array.T
