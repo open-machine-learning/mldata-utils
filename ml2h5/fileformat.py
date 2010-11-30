@@ -22,8 +22,8 @@ def _try_suffix(fname):
         return 'h5', True
     elif suffix in ('csv', 'tsv'):
         return 'csv', True
-    elif suffix in ('uci', 'data'):
-        return 'uci', True
+    #elif suffix in ('uci', 'data'):
+    #    return 'uci', True
     elif suffix in ('bz2', 'gz', 'zip'):
         try:
             presuffix = fname.split('.')[-2]
@@ -156,7 +156,7 @@ def infer_seperator(fname):
 def get(fname, skip_suffix=False):
     """Get format of given file.
 
-    By suffix it detects: libsvm, arff, csv, h5, uci, tar.gz, tar.bz2, zip,
+    By suffix it detects: libsvm, arff, csv, h5, tar.gz, tar.bz2, zip,
     matlab, octave.
     By deeper inspection it detects: h5, matlab, octave, arff, csv, libsvm
 
