@@ -21,6 +21,7 @@ mleval/__init__.py
 mleval/classification.py
 mleval/evaluation.py
 mleval/multiclass.py
+mleval/output.py
 mleval/parse.py
 mleval/regression.py
 mleval/util.py
