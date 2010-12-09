@@ -4,6 +4,13 @@ import random
 
 
 def check_split_str(split_str):
+    if type(split_str) in [list,numpy.ndarray,numpy.matrix]:
+        split_str=', '.join([str(i) for i in split_str])
+    else:    
+        split_str=str(split_str)
+#    import pdb
+#    pdb.set_trace()
+    split_str=split_str.replace(' ','')
     if re.match("((^|,)(\d+:\d+|\d+))+$",split_str)==None:
         return False
 
@@ -11,7 +18,6 @@ def check_split_str(split_str):
     tk_sort=[]
     tk_pr=[]
     tk_po=[]
-    split_str=str(split_str)
     tk_split=re.findall("(^|,)(\d+:\d+)|(\d+)",split_str)
 
     for i in range(len(tk_split)):
@@ -46,7 +52,11 @@ def expand_split_str(split_str):
     tk_sort=[]
     tk_pr=[]
     tk_po=[]
-    split_str=str(split_str)
+    if type(split_str) in [list,numpy.ndarray,numpy.matrix]:
+        split_str=', '.join([str(i) for i in split_str])
+    else:    
+        split_str=str(split_str)
+
     tk_split=re.findall("(^|,)(\d+:\d+)|(\d+)",split_str)
     for i in range(len(tk_split)):
         if tk_split[i][2]!='':
@@ -82,6 +92,7 @@ def reduce_split_str(split_str):
     else:    
         split_str=str(split_str)
 
+    split_str=split_str.replace(' ','')
     tk_split=re.findall("(^|,)(\d+:\d+)|(\d+)",split_str)
     for i in range(len(tk_split)):
         if tk_split[i][2]!='':
@@ -104,13 +115,22 @@ def reduce_split_str(split_str):
 
     if len(tk) == 1:
         return tk
+
+    cindex=[0]
+    for i in range(1,len(tk)):
+        if (tk_po[i]>=tk_po[i-1]):        
+            cindex.append(i)
+    tk=tk[cindex]
+    tk_pr=tk_pr[cindex]
+    tk_po=tk_po[cindex]
     
     tk_reduce=[]
     akt=0
     red_ind=0
     aktstr=str(tk_pr[0])
     for i in range(1,len(tk)):
-        if (tk_pr[i]==tk_po[i-1]):
+            
+        if (tk_pr[i]<=tk_po[i-1]):
             akt+=1
             
         else:
@@ -138,7 +158,7 @@ def reduce_split_str(split_str):
 
 def main():
     print check_split_str("1,2,3,4,5:7,27,28:32,32:30")
-    x = reduce_split_str("1")
+    x = reduce_split_str("0, 53,55,55 ,55:60,57, 61:62")
     print x
     y= expand_split_str("1,2,3:7,27:33")
     print y
