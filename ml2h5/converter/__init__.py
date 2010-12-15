@@ -5,7 +5,7 @@ Convert from and to HDF5 (spec of mldata.org)
 ALLOWED_SEPERATORS = (None, ',', ' ', '\t')
 
 TO_H5 = ['libsvm', 'arff', 'csv', 'matlab', 'octave']
-FROM_H5 = ['libsvm','arff', 'csv', 'matlab', 'octave', 'xml']
+FROM_H5 = ['libsvm','arff', 'csv', 'matlab', 'octave', 'xml', 'rdata']
 EPSILON = 1e-15
 
 #1 MB is maximum line len for autodetection
@@ -22,6 +22,7 @@ from h5_libsvm import H5_LibSVM
 from h5_csv import H5_CSV
 from h5_mat import H5_MAT
 from h5_octave import H5_OCTAVE
+from h5_rdata import H5_RData
 #from h5_uci import H5_UCI
 from basehandler import BaseHandler
 
@@ -31,6 +32,7 @@ HANDLERS = {
     'csv': H5_CSV,
     'matlab': H5_MAT,
     'octave' : H5_OCTAVE,
+    'rdata': H5_RData,
     #'uci' : H5_UCI,
     'h5': BaseHandler
 }

@@ -1,5 +1,6 @@
 import h5py
 import os.path
+import gzip
 from ml2h5.converter.basehandler import ALLOWED_SEPERATORS
 from ml2h5.converter import AUTODETECTION_MAXBUFLEN
 
@@ -38,6 +39,8 @@ def _try_suffix(fname):
         return 'octave', True
     elif suffix in ('xml'):
         return 'xml', True
+    elif suffix in ('RData', 'rdata'):
+        return 'rdata', True
     else: # unknown
         return suffix, False
 
@@ -117,6 +120,12 @@ def _try_octave(fname):
     except:
         return False
 
+def _try_rdata(fname):
+    try:
+        return gzip.GzipFile(fname).read(4)==('RDX2')
+    except:
+        return False
+
 def infer_seperator(fname):
     """Infer seperator for variables in given file.
 
@@ -172,6 +181,7 @@ def get(fname, skip_suffix=False):
 
     if _try_h5(fname): return 'h5'
     elif _try_matlab(fname): return 'matlab'
+    elif _try_rdata(fname): return 'rdata'
     elif _try_octave(fname): return 'octave'
     elif _try_libsvm(fname): return 'libsvm'
     elif _try_csv(fname): return 'csv'
@@ -212,7 +222,7 @@ def can_convert_h5_to(dst_type, h5_filename=None):
                 ordering=set(('label','data'))
                 if ordering.issubset(set(h5['data'].keys())):
                     return True # TODO check if this is sparse data / ndarray data
-            elif dst_type in ('csv', 'arff'): # csv/arff support everything except sparse data
+            elif dst_type in ('csv', 'arff', 'rdata'): # csv/arff/RData support everything except sparse data
                 for k in h5['data'].keys():
                     if k.endswith('_indptr') or k.endswith('_indices'):
                         return False
