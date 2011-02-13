@@ -4,12 +4,13 @@ import random
 
 
 def check_split_str(split_str):
+    if split_str=='':
+        return True            
+
     if type(split_str) in [list,numpy.ndarray,numpy.matrix]:
         split_str=', '.join([str(i) for i in split_str])
     else:    
         split_str=str(split_str)
-#    import pdb
-#    pdb.set_trace()
     split_str=split_str.replace(' ','')
     if re.match("((^|,)(\d+:\d+|\d+))+$",split_str)==None:
         return False
@@ -86,7 +87,8 @@ def reduce_split_str(split_str):
     tk_sort=[]
     tk_pr=[]
     tk_po=[]
-
+    if len(split_str)==0 :
+        return []    
     if type(split_str) in [list,numpy.ndarray,numpy.matrix]:
         split_str=', '.join([str(i) for i in split_str])
     else:    
@@ -149,12 +151,35 @@ def reduce_split_str(split_str):
                 aktstr=tk_pr[i]
             else:
                 tk_reduce.append(tk[i])
-
-
-    
-
-
     return tk_reduce
+
+def check_split_intersec(split_lists):
+    if len(split_lists)==0:
+        return True            
+    if len(split_lists[0])>0 and type(split_lists[0][0])==list:
+        max_lines=min([len(i) for i in split_lists])    
+        for i in range(max_lines):    
+            split_line = [splits[i] for splits in split_lists]
+            split_set=set()
+            listsize=0
+            for sp in split_line:
+                if len(sp):    
+                    listsize+=len(sp)                
+                    split_set|=set(sp)
+            if not listsize==len(split_set):
+                return i+1
+    else:
+        split_set=set()
+        listsize=0
+        for sp in split_lists:    
+            listsize+=len(sp)    
+            split_set|=set(sp)
+        if not listsize==len(split_set):
+            return 1
+
+    return 0
+        
+
 
 def main():
     print check_split_str("1,2,3,4,5:7,27,28:32,32:30")
@@ -162,6 +187,7 @@ def main():
     print x
     y= expand_split_str("1,2,3:7,27:33")
     print y
+    print check_split_intersec([[[1,2],[3,4]],[[5,6],[1,8],[1,2]]])
     
 
 if __name__=="__main__":

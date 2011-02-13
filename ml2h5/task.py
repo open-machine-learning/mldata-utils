@@ -6,7 +6,7 @@ This module heavily relies on the functionality required for http://mldata.org
 
 import os, h5py, numpy
 import ml2h5.data
-from . import VERSION_MLDATA
+from . import VERSION_MLDATA,NUM_EXTRACT
 from indexsplit import reduce_split_str
 
 COMPRESSION = None
@@ -186,7 +186,6 @@ def update_data(h5, taskinfo=None):
 
     if not taskinfo:
         return True
-
     for name in taskinfo:
         if taskinfo[name] is not None:
             if name in group: del group[name]
@@ -242,6 +241,15 @@ def update_or_create(fname, task, taskinfo=None):
     h5.attrs['mldata'] = VERSION_MLDATA
     h5.attrs['comment'] = 'Task file'
 
+# convert train_idx and test_idx to data_split
+    #import pdb
+    #pdb.set_trace()
+    data_size=taskinfo['data_size']
+
+    taskinfo['data_split']=conv_idx2image(taskinfo['train_idx'],taskinfo['val_idx'],taskinfo['test_idx'],data_size)
+    del taskinfo['train_idx']
+    del taskinfo['val_idx']
+    del taskinfo['test_idx']
     error = False
     if not update_description(h5, task):
         error = True
@@ -268,7 +276,12 @@ def get_extract(fname):
 
     for t in task_data_fields:
         try:
-            extract[t]=reduce_split_str(h5['task'][t][...])
+            if len(h5['task'][t][...].shape) > 1:
+                extract[t]=[]   
+                for l in h5['task'][t][...]:
+                    extract[t].append(reduce_split_str(l))
+            else:    
+                extract[t]=reduce_split_str(h5['task'][t][...])
         except KeyError:
             pass
     for t in task_descr_fields:
@@ -276,34 +289,125 @@ def get_extract(fname):
             extract[t]=h5['task_descr'][t][...]
         except KeyError:
             pass
+    #import pdb
+    #pdb.set_trace()
+    max_split_size=10
+    split_overflow=False
+    split_string_overflow=False
+    if 'data_split' in h5['task'].keys():
+        idx=conv_image2idx(h5['task/data_split'][...])
+        extract_reduce={}
+        for key in ['train_idx','val_idx','test_idx']:        
+            extract[key]=[reduce_split_str(i) for i in idx[key]]
+            extract_reduce[key]=[reduce_split_str(i) for i in idx[key][:NUM_EXTRACT]]
 
+        if len(idx['train_idx']) > NUM_EXTRACT:
+            split_overflow=True    
+
+        for key in ['train_idx','val_idx','test_idx']:
+            if split_overflow:
+                extract_reduce[key].append(['...'])            
+            for i in range(len(extract_reduce[key])):
+                if len(extract_reduce[key][i]) > max_split_size:
+                    extract_reduce[key][i] = extract_reduce[key][i][:max_split_size]
+                    extract_reduce[key][i][max_split_size-1] = '...'
+                    split_string_overflow=True
+    try:
+        num_split_reduce=len(extract_reduce['train_idx'])
+        reduce_split_nr=[str(i) for i in range(num_split_reduce)]
+        if split_overflow:
+            reduce_split_nr[-1]='...'    
+        extract['split_idx']=zip(range(len(extract['train_idx'])),extract['train_idx'],extract['val_idx'],extract['test_idx'])
+        extract['reduce_split_idx']=zip(reduce_split_nr,extract_reduce['train_idx'],extract_reduce['val_idx'],extract_reduce['test_idx'])
+        extract['split_overflow']=split_overflow
+        extract['split_string_overflow']=split_string_overflow
+    except KeyError:
+        extract['split']=[(0,[],[])]   
+        extract['split_overflow']=False
     h5.close()
-
     return extract
 
-def get_split_image(fname):
+def get_split_image(fname,split_nr,norm=1000):
     extract = {}
     try:
         h5 = h5py.File(fname, 'r')
     except:
         return extract
-
-    dsets = ['train_idx', 'test_idx']
-    for dset in dsets:
-        path = '/task/' + dset
-        if path in h5:
-            extract[dset] = h5[path][...]
-    
+    path = '/task/data_split' 
+    if path in h5:
+        try:    
+            image_data = h5[path][...][split_nr]
+        except IndexError:
+            return None    
+    else: 
+        return None    
     h5.close()
+    # normalize to length of norm
+    image_norm=numpy.zeros([norm,1])
+    for i in xrange(len(image_norm)):
+        image_norm[i]=image_data[int(i*(float(len(image_data))/norm))]
+    return image_norm.T[0]
 
-    if len(extract['train_idx'].shape)==1:
-        dim=1
-    else:
-        dim=extract['train_idx'].shape[0]
-    image_data=numpy.zeros([max(extract['train_idx'][-1],extract['test_idx'][-1])+1,dim])
-    image_data[extract['train_idx']]=1
-    image_data[extract['test_idx']]=2
-    return image_data.T
+
+def conv_idx2image(train_idx,val_idx,test_idx,last_idx):    
+    """Convert all idx to image.
+
+    @param train_idx: Train Indices
+    @type train_idx: list of lists of int
+    @return: datasplit image
+    @rtype: list of int
+    """
+    dim=len(train_idx)
+    image_data=numpy.zeros([dim,last_idx])
+    for split_nr in range(dim):
+        if train_idx[split_nr][0]=='':
+            train_split=numpy.array([],dtype=int)   
+        else:    
+            train_split=numpy.array([int(i) for i in (train_idx[split_nr])[0].split(', ')],dtype=int)
+        try:    
+            if test_idx[split_nr][0]=='':
+                test_split=numpy.array([],dtype=int)   
+            else:    
+                test_split=numpy.array([int(i) for i in (test_idx[split_nr])[0].split(', ')],dtype=int)
+        except:
+            test_split=numpy.array([],dtype=int) 
+        try:
+            if val_idx[split_nr][0]=='':
+                val_split=numpy.array([],dtype=int)   
+            else:    
+                val_split=numpy.array([int(i) for i in (val_idx[split_nr])[0].split(', ')],dtype=int)
+        except:
+            val_split=numpy.array([],dtype=int)        
+    
+        try:
+            image_data[split_nr][train_split]=1
+            image_data[split_nr][val_split]=2
+            image_data[split_nr][test_split]=3
+        except IndexError:            
+            raise ml2h5.converter.ConversionError, 'Index out of Range' 
+    return image_data
+
+
+def conv_image2idx(img):
+    """Convert all images to idx.
+
+    @param fname: name of Task file
+    @type fname: string
+    @return: datasets from Task file
+    @rtype: dict of lists
+    """
+    #import pdb
+    #pdb.set_trace()
+    train_idx=[]
+    val_idx=[]
+    test_idx=[]
+
+    for split in img:
+        train_idx.append(numpy.array(range(len(split)))[split==1])
+        val_idx.append(numpy.array(range(len(split)))[split==2])
+        test_idx.append(numpy.array(range(len(split)))[split==3])
+    return {'train_idx':train_idx,'val_idx':val_idx, 'test_idx':test_idx }  
+
 
 def get_variables(fname):
     """Get input/output variables from given Data file.
@@ -324,7 +428,8 @@ def get_variables(fname):
 def get_test_output(fname):
     """Get test_idx and output_variables from given Task file."""
     h5 = h5py.File(fname, 'r')
-    test_idx = h5['/task/test_idx'][:]
+    test_idx = image2idx(h5['/task/data_split'][...])['test_idx']
+    #test_idx = h5['/task/test_idx'][:]
     output_variables = h5['/task/output_variables'][...]
     h5.close()
     return test_idx, output_variables
