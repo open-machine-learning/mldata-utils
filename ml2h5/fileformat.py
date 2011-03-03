@@ -100,13 +100,8 @@ def _try_h5(fname):
     @param fname: name of file to determine format for
     @type fname: string
     """
-    try:
-        fp = h5py.File(fname, 'r')
-    except:
-        return False
 
-    fp.close()
-    return True
+    return h5py.is_hdf5(fname)
 
 def _try_matlab(fname):
     try:
@@ -214,7 +209,7 @@ def can_convert_h5_to(dst_type, h5_filename=None):
     if dst_type in ('matlab', 'octave'):
         return True
 
-    if h5_filename and h5_filename.endswith('.h5'):
+    if h5_filename and h5_filename.endswith('.h5') and h5py.is_hdf5(h5_filename):
         try:
             h5 = h5py.File(h5_filename, 'r')
 

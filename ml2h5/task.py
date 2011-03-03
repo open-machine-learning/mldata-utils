@@ -229,10 +229,7 @@ def update_or_create(fname, task, taskinfo=None):
     @rtype: boolean
     """
     try:
-        if not os.path.exists(fname):
-            h5 = h5py.File(fname, 'w')
-        else:
-            h5 = h5py.File(fname, 'a')
+        h5 = h5py.File(fname, 'a')
     except:
         return False
 
@@ -269,10 +266,10 @@ def get_extract(fname):
     @rtype: dict of lists
     """
     extract = {}
-    try:
-        h5 = h5py.File(fname, 'r')
-    except:
+    if not h5py.is_hdf5(fname):
         return extract
+
+    h5 = h5py.File(fname, 'r')
 
     for t in task_data_fields:
         try:
@@ -329,10 +326,11 @@ def get_extract(fname):
 
 def get_split_image(fname,split_nr,norm=1000):
     extract = {}
-    try:
-        h5 = h5py.File(fname, 'r')
-    except:
+
+    if not h5py.is_hdf5(fname):
         return extract
+    h5 = h5py.File(fname, 'r')
+
     path = '/task/data_split' 
     if path in h5:
         try:    
@@ -427,6 +425,8 @@ def get_variables(fname):
 
 def get_test_output(fname):
     """Get test_idx and output_variables from given Task file."""
+    if not h5py.is_hdf5(fname):
+        return None,None
     h5 = h5py.File(fname, 'r')
     test_idx = image2idx(h5['/task/data_split'][...])['test_idx']
     #test_idx = h5['/task/test_idx'][:]

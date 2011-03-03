@@ -18,6 +18,9 @@ def get_num_instattr(fname):
     @return: number of instances and number of attributes
     @rtype: tuple containing 2 integers
     """
+    if not h5py.is_hdf5(fname):
+        return (-1,-1)
+
     try:
         h5 = h5py.File(fname, 'r')
         num_inst = 0
@@ -181,10 +184,11 @@ def get_extract(fname):
         'types': [],
         'data': [],
     }
-    try:
-        h5 = h5py.File(fname, 'r')
-    except:
+
+    if not h5py.is_hdf5(fname):
         return extract
+
+    h5 = h5py.File(fname, 'r')
 
     attrs = ('mldata', 'name', 'comment')
     for a in attrs:
@@ -338,6 +342,10 @@ def _find_dset(fname, output_variables):
     @return: dataset corresponding to output_variables
     @rtype: list of integer
     """
+
+    if not h5py.is_hdf5(fname):
+        return
+
     h5 = h5py.File(fname, 'r')
     dset = None
 
@@ -381,6 +389,9 @@ def _find_dset(fname, output_variables):
     return dset
 
 def get_attribute_types(fname):
+    if not h5py.is_hdf5(fname):
+        return ""
+
     types=set()
     dt = h5py.special_dtype(vlen=str)
     try:

@@ -169,6 +169,9 @@ class BaseHandler(object):
         """
         # we want the exception handled elsewhere
 
+        if not h5py.is_hdf5(fname):
+            return
+
         h5 = h5py.File(self.fname, 'r')
 
         contents = {
