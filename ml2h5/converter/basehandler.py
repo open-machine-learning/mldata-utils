@@ -169,7 +169,7 @@ class BaseHandler(object):
         """
         # we want the exception handled elsewhere
 
-        if not h5py.is_hdf5(fname):
+        if not h5py.is_hdf5(self.fname):
             return
 
         h5 = h5py.File(self.fname, 'r')
