@@ -402,10 +402,11 @@ def get_attribute_types(fname):
             if indptr_name in h5 and indices_name in h5:
                 types += 'Sparse Matrix'
             else:
-                try:
+                if '/data_descr/types' in h5 and  \
+                            o in h5['/data_descr/types']:
                     types += h5['/data_descr/types'][o]
-                except:
-                    t=h5['/data/'][o].dtype
+                else:
+                    t=h5['/data/' + o].dtype
                     if t==dt:
                         types.add("String")
                     elif t in (numpy.int64, numpy.int32):
