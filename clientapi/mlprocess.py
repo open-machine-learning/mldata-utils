@@ -30,6 +30,10 @@ def init_svm(task_type, kernel, labels):
 
 def parse_task(task_filename):
     """Manually parse the task file"""
+
+    if not h5py.is_hdf5(task_filename):
+        return
+
     tf = h5py.File(task_filename,'r')
 
     task_type = tf['task_descr']['type'].value
