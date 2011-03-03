@@ -16,6 +16,7 @@ ml2h5/converter/h5_csv.py
 ml2h5/converter/h5_libsvm.py
 ml2h5/converter/h5_mat.py
 ml2h5/converter/h5_octave.py
+ml2h5/converter/h5_rdata.py
 ml2h5/converter/h5_uci.py
 mleval/__init__.py
 mleval/classification.py
