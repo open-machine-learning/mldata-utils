@@ -11,7 +11,7 @@ from indexsplit import reduce_split_str
 
 COMPRESSION = None
 
-task_data_fields = ['train_idx', 'test_idx', 'input_variables', 'output_variables']
+task_data_fields = ['data_size', 'data_split', 'input_variables', 'output_variables']
 task_descr_fields = ['performance_measure','type']
 
 
