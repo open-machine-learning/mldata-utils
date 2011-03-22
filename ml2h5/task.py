@@ -356,7 +356,7 @@ def conv_idx2image(train_idx,val_idx,test_idx,last_idx):
     @rtype: list of int
     """
     dim=len(train_idx)
-    image_data=numpy.zeros([dim,last_idx])
+    image_data=numpy.zeros([dim,last_idx], dtype=numpy.uint8)
     for split_nr in range(dim):
         if train_idx[split_nr][0]=='':
             train_split=numpy.array([],dtype=int)   

@@ -265,12 +265,14 @@ def get_unparseable(fname):
             i = 0
             data = []
             for l in f:
-                data.append(l)
+                # make sure we have unicode strings afterwards
+                # otherwise this might lead to exceptions
+                data.append(l.decode('utf-8', 'replace'))
                 i += 1
                 if i > NUM_EXTRACT:
                     break
             f.close()
-            data = "\n".join(data)
+            data = u"\n".join(data)
 
     return {'data': [[intro, data]]}
 
