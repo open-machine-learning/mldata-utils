@@ -11,7 +11,7 @@ from indexsplit import reduce_split_str
 
 COMPRESSION = None
 
-task_data_fields = ['data_split', 'input_variables', 'output_variables']
+task_data_fields = ['train_idx', 'val_idx', 'test_idx', 'data_split', 'input_variables', 'output_variables']
 task_descr_fields = ['performance_measure','type']
 
 
@@ -37,7 +37,7 @@ def get_splitnames(fnames):
         if n.find('train') != -1 or n.find('.tr') != -1:
             names.append('train_idx')
         elif n.find('.val') != -1:
-            names.append('validation_idx')
+            names.append('val_idx')
         elif n.find('test') != -1 or n.find('.t') != -1 or n.find('.r') != -1:
             names.append('test_idx')
         else:
@@ -195,6 +195,7 @@ def update_data(h5, taskinfo=None):
 
 def get_taskinfo(fname):
     taskinfo = None
+    data_size = 0
     format = ml2h5.fileformat.get(fname)
     if not format in ('matlab','h5','octave'):
         raise ml2h5.converter.ConversionError, 'Format not supported (only matlab, \
@@ -203,13 +204,31 @@ def get_taskinfo(fname):
         c = ml2h5.converter.Converter(fname,
                 '/tmp/dummy_does_not_exist.h5', format_in=format, format_out='h5', attribute_names_first=False, merge=False, type='data')
         data = c.read()
-
+        
         for g in ('data','task'):
             for f in task_data_fields:
                 if data.has_key(g) and data[g].has_key(f):
                     if not taskinfo:
                         taskinfo=dict()
                     taskinfo[f]=data[g][f]
+                    if f in ['train_idx','val_idx','test_idx']:
+                        data_size+=len(taskinfo[f])
+                    
+        if 'data_split' in taskinfo.keys():
+            data_size=len(taskinfo['data_split'])
+            idx=conv_image2idx(taskinfo['data_split'])
+            del taskinfo['datasplit']
+
+            for key in ['train_idx','val_idx','test_idx']:        
+                taskinfo[key]=idx[key]
+            
+        for key in ['train_idx','val_idx','test_idx']:    
+            if not key in taskinfo.keys():
+                taskinfo[key]=[]        
+            if len(taskinfo[key])>0 and type(taskinfo[key][0])!=list:
+                taskinfo[key]=[taskinfo[key]]
+
+        taskinfo['data_size']=data_size
 
     except ml2h5.converter.ConversionError:
         pass
@@ -239,10 +258,7 @@ def update_or_create(fname, task, taskinfo=None):
     h5.attrs['comment'] = 'Task file'
 
 # convert train_idx and test_idx to data_split
-    #import pdb
-    #pdb.set_trace()
     data_size=taskinfo['data_size']
-
     taskinfo['data_split']=conv_idx2image(taskinfo['train_idx'],taskinfo['val_idx'],taskinfo['test_idx'],data_size)
     del taskinfo['train_idx']
     del taskinfo['val_idx']
@@ -291,9 +307,21 @@ def get_extract(fname):
     max_split_size=10
     split_overflow=False
     split_string_overflow=False
-    if 'data_split' in h5['task'].keys():
+    idx={}
+    extract_reduce={}
+    if 'train_idx' in h5['task'].keys():
+        idx['train_idx']=h5['task/train_idx'][...]    
+        for key in ['val_idx','test_idx']:
+            if key in h5['task'].keys():
+                idx[key]=h5['task'][key][...]
+            else:
+                idx[key]=[]
+               
+                
+            
+    elif 'data_split' in h5['task'].keys():
         idx=conv_image2idx(h5['task/data_split'][...])
-        extract_reduce={}
+    try:
         for key in ['train_idx','val_idx','test_idx']:        
             extract[key]=[reduce_split_str(i) for i in idx[key]]
             extract_reduce[key]=[reduce_split_str(i) for i in idx[key][:NUM_EXTRACT]]
@@ -309,7 +337,7 @@ def get_extract(fname):
                     extract_reduce[key][i] = extract_reduce[key][i][:max_split_size]
                     extract_reduce[key][i][max_split_size-1] = '...'
                     split_string_overflow=True
-    try:
+    
         num_split_reduce=len(extract_reduce['train_idx'])
         reduce_split_nr=[str(i) for i in range(num_split_reduce)]
         if split_overflow:
@@ -355,25 +383,22 @@ def conv_idx2image(train_idx,val_idx,test_idx,last_idx):
     @return: datasplit image
     @rtype: list of int
     """
+#    import pdb
+#    pdb.set_trace()
+    if train_idx==None:
+        return None
+
     dim=len(train_idx)
     image_data=numpy.zeros([dim,last_idx], dtype=numpy.uint8)
     for split_nr in range(dim):
-        if train_idx[split_nr][0]=='':
-            train_split=numpy.array([],dtype=int)   
-        else:    
-            train_split=numpy.array([int(i) for i in (train_idx[split_nr])[0].split(', ')],dtype=int)
+            
+        train_split=numpy.array(train_idx[split_nr],dtype=int)   
         try:    
-            if test_idx[split_nr][0]=='':
-                test_split=numpy.array([],dtype=int)   
-            else:    
-                test_split=numpy.array([int(i) for i in (test_idx[split_nr])[0].split(', ')],dtype=int)
+            test_split=numpy.array(test_idx[split_nr],dtype=int)   
         except:
             test_split=numpy.array([],dtype=int) 
         try:
-            if val_idx[split_nr][0]=='':
-                val_split=numpy.array([],dtype=int)   
-            else:    
-                val_split=numpy.array([int(i) for i in (val_idx[split_nr])[0].split(', ')],dtype=int)
+            val_split=numpy.array(val_idx[split_nr],dtype=int)   
         except:
             val_split=numpy.array([],dtype=int)        
     

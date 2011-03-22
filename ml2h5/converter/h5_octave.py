@@ -202,7 +202,6 @@ class H5_OCTAVE(BaseHandler):
         data={}
         names=[]
         octf = open(self.fname, 'r')
-
         # header check
         if not self._check_header(octf):
             raise ml2h5.converter.ConversionError('Header check failed')

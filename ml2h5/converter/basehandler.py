@@ -182,8 +182,11 @@ class BaseHandler(object):
 
         if contents['comment']=='Task file':
             contents['task']=dict()
-            contents['ordering']=ml2h5.task.task_data_fields
+            contents['ordering']=list()
             group='task'
+            for field in ml2h5.task.task_data_fields:
+                if field in h5[group]:
+                    contents['ordering'].append(field)
         else:
             contents['data']=dict()
             contents['ordering']=h5['/data_descr/ordering'][...].tolist()
