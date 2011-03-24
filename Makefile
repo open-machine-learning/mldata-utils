@@ -12,7 +12,7 @@ release: dist
 		tar xjf $(TARBALL) \;  \
 		cd $(DIRNAME) \; \
 		python setup.py install --prefix=/home/mldata/python/ \; \
-		sudo /etc/apache2/apache_restart \)
+		sudo /etc/init.d/fapws3 restart \)
 
 dist:
 	@python setup.py sdist --force-manifest --dist-dir=$(RELEASES) --formats=bztar
