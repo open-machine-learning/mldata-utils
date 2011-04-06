@@ -2,6 +2,7 @@
 
 set -e
 for d in uci-20070111-zoo.h5 \
+    pendigits_ucsd_mkl.oct \
 	uci-20070111-zoo.arff \
 	bodyfat.h5 \
 	friedman-datasets-fri_c2_100_50.arff \

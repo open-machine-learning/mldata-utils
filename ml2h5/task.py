@@ -193,6 +193,18 @@ def update_data(h5, taskinfo=None):
 
     return True
 
+def check_taskfile(fname):
+    try:
+        format = ml2h5.fileformat.get(fname)
+        if not format in ('matlab','h5','octave'):
+            return False
+   
+        c = ml2h5.converter.Converter(fname,
+                '/tmp/dummy_does_not_exist.h5', format_in=format, format_out='h5', attribute_names_first=False, merge=False, type='data')
+    except:
+        return False
+    return True
+
 def get_taskinfo(fname):
     taskinfo = None
     data_size = 0
