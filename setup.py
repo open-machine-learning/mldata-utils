@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-VERSION='0.4.1'
+VERSION='0.5.0'
 DESCRIPTION='Utilities around hdf5 and for compute performance measures',
 LONG_DESCRIPTION="""
 Utility functions to perform evaluations and to convert from/to the hdf5 based mldata format into/from typical machine learning formats like .csv,.arff,.octave,.mat. This code is actually used on mldata.org to perform the evaluations and data and task conversions.

@@ -30,3 +30,5 @@ scripts/ml2h5
 scripts/ml2h5extract_data
 scripts/ml2h5extract_task
 scripts/mleval
+clientapi/mlprocess.py
+clientapi/api_demo.sh

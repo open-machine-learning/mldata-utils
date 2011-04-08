@@ -1,3 +1,10 @@
+0.5.0 2011/04/08 by Soeren Sonnenburg
+
+* Change task file format, such that data splits can have a variable number
+  items and put into up to 256 categories of training/validation/test/not
+  used/...
+* Various bugfixes.
+
 0.4.0 2010/11/12 by Cheng Soon Ong
 
 * Added clientapi to interact with mldata.org via python on a client.
