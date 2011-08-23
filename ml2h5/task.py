@@ -465,7 +465,7 @@ def get_test_output(fname):
     if not h5py.is_hdf5(fname):
         return None,None
     h5 = h5py.File(fname, 'r')
-    test_idx = image2idx(h5['/task/data_split'][...])['test_idx']
+    test_idx = conv_image2idx(h5['/task/data_split'][...])['test_idx']
     #test_idx = h5['/task/test_idx'][:]
     output_variables = h5['/task/output_variables'][...]
     h5.close()
