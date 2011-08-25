@@ -47,6 +47,8 @@ class H5_CSV(BaseHandler):
         parsed = []
         anf = self.attribute_names_first # copy value
         for line in infile:
+            if line == '\n' or line == '\n\r':
+                continue
             l = line.strip().split(self.seperator)
             if anf:
                 names = l
