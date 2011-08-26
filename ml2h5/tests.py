@@ -17,6 +17,8 @@ class TestConversion(unittest.TestCase):
         'uci': '../fixtures/iris.data',
         'octave': '../fixtures/iris.data',
         'R': '../fixtures/iris.Rdata',
+        'libsvm': '../fixtures/breast-cancer.txt',
+#        'matlab': '../fixtures/PDXprecip.dat',
     }
     
 
@@ -35,18 +37,30 @@ class TestConversion(unittest.TestCase):
         self.assertEqual(data['data']['sepallength'][3], 4.6,
                          'wrong first integer')
 
-    def test_uci(self):
+    def test_uci2h5(self):
         converter = H5_UCI(self.fixtures['uci'])
         data = converter.read()
         self.assertEqual(data['data']['sepallength'][3], 4.6,
                          'wrong first integer')
 
-    def test_rdata(self):
+    def test_rdata2h5(self):
         converter = H5_RData(self.fixtures['R'])
 #        data = converter.read()
 #        print data
 #        self.assertEqual(data['data']['sepallength'][3], 4.6,
 #                         'wrong first integer')
+
+    def test_octave(self):
+        pass
+
+    def test_matlab(self):
+        pass
+
+    def test_libsvm(self):
+        converter = H5_LibSVM(self.fixtures['libsvm'])
+        data = converter.read()
+        self.assertEqual(data['data']['data'][3][2], 1,
+                         'wrong first integer')
 
 if __name__ == '__main__':
     unittest.main()
