@@ -2,3 +2,23 @@ This package supplements http://mldata.org and should give you all tools
 necessary to work with Data, Task and Solution.
 
 See INSTALL for installation details.
+
+--------------------------
+Data conversions supported
+--------------------------
+
+From h5:
+- arff
+- csv
+- libsvm
+- matlab
+- octave
+- R
+
+To h5:
+- arff
+- csv
+- libsvm
+- matlab
+- octave
+- uci
