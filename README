@@ -7,18 +7,16 @@ See INSTALL for installation details.
 Data conversions supported
 --------------------------
 
-From h5:
-- arff
-- csv
-- libsvm
-- matlab
-- octave
-- R
+I: Import to hdf5 
+E: Export from hdf5 
 
-To h5:
-- arff
-- csv
-- libsvm
-- matlab
-- octave
-- uci
+       | I | E |
+arff   | Y | Y |
+csv    | Y | Y |
+libsvm | ? | ? |
+matlab | ? | ? |
+octave | ? | ? |
+R      | Y | N |
+uci    | N | Y |
+
+?: not tested
