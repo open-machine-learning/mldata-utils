@@ -15,6 +15,8 @@ class TestConversion(unittest.TestCase):
         'csv': '../fixtures/test.csv',
         'arff': '../fixtures/iris.arff',
         'uci': '../fixtures/iris.data',
+        'octave': '../fixtures/iris.data',
+        'R': '../fixtures/iris.Rdata',
     }
     
 
@@ -36,9 +38,15 @@ class TestConversion(unittest.TestCase):
     def test_uci(self):
         converter = H5_UCI(self.fixtures['uci'])
         data = converter.read()
-        print data
         self.assertEqual(data['data']['sepallength'][3], 4.6,
                          'wrong first integer')
+
+    def test_rdata(self):
+        converter = H5_RData(self.fixtures['R'])
+#        data = converter.read()
+#        print data
+#        self.assertEqual(data['data']['sepallength'][3], 4.6,
+#                         'wrong first integer')
 
 if __name__ == '__main__':
     unittest.main()
