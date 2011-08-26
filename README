@@ -13,10 +13,12 @@ E: Export from hdf5
        | I | E |
 arff   | Y | Y |
 csv    | Y | Y |
-libsvm | ? | ? |
-matlab | ? | ? |
-octave | ? | ? |
+libsvm | Y | Y |
+matlab | Y | Y |
 R      | Y | N |
 uci    | N | Y |
 
-?: not tested
+Known issues:
+libsvn - empty labels are not handled
+csv    - only ',' works as separator
+arff   - only ',' works as separator
