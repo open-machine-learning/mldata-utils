@@ -1,4 +1,5 @@
 import random
+import os
 import unittest
 
 from converter.h5_csv import H5_CSV
@@ -11,20 +12,25 @@ from converter.h5_uci import H5_UCI
 from converter.basehandler import BaseHandler
 
 import converter
+import fileformat
+
+FIXTURES = {
+    'csv': '../fixtures/test.csv',
+    'arff': '../fixtures/iris.arff',
+    'uci': '../fixtures/iris.data',
+    'R': '../fixtures/iris.Rdata',
+    'libsvm': '../fixtures/breast-cancer.txt',
+    'h5': '../examples/uci-20070111-zoo.h5',
+    'octave': '../fixtures/test.octave',
+    'mat': '../fixtures/test.mat',
+#        'matlab': '../examples/PDXprecip.dat',
+
+    'big-arff': '../fixtures/breastCancer.arff',
+}
 
 class TestConversion(unittest.TestCase):
+    fixtures = FIXTURES
 
-    fixtures = {
-        'csv': '../fixtures/test.csv',
-        'arff': '../fixtures/iris.arff',
-        'uci': '../fixtures/iris.data',
-        'R': '../fixtures/iris.Rdata',
-        'libsvm': '../fixtures/breast-cancer.txt',
-        'h5': '../examples/uci-20070111-zoo.h5',
-        'octave': '../fixtures/test.octave',
-        'mat': '../fixtures/test.mat',
-#        'matlab': '../examples/PDXprecip.dat',
-    }
     result = {
         'h5': '../fixtures/res.h5',
         'generic': '../fixtures/res.',
@@ -37,6 +43,12 @@ class TestConversion(unittest.TestCase):
     def setUp(self):
         pass
 
+    # checking fileformat from string is used in Converter
+    def test_reading_fileformats(self):
+        ff = fileformat.get('non-existsing-file.h5')
+        self.assertEqual('h5', ff,
+                         'wrong format found')
+    
     def test_read_csv(self):
         conv = H5_CSV(self.fixtures['csv'])
         data = conv.read()
@@ -88,6 +100,10 @@ class TestConversion(unittest.TestCase):
         
     def test_arff2h5(self):
         self.conversion_in(self.fixtures['arff'],self.result['h5'])
+        
+    @unittest.skipUnless(os.path.exists(FIXTURES['big-arff']),"No big arff in fixtures")
+    def test_bigarff2h5(self):
+        self.conversion_in(self.fixtures['big-arff'],self.result['h5'])
         
     def test_libsvm2h5(self):
         self.conversion_in(self.fixtures['libsvm'],self.result['h5'])
