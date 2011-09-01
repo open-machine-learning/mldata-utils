@@ -398,14 +398,15 @@ def get_attribute_types(fname):
     dt = h5py.special_dtype(vlen=str)
     try:
         h5 = h5py.File(fname, 'r')
+        have_type = '/data_descr/types' in h5
+        all_types = set(h5['/data_descr/types'])
         for o in h5['/data_descr/ordering']:
             indptr_name='/data/' + o + '_indptr'
             indices_name='/data/' + o + '_indices'
             if indptr_name in h5 and indices_name in h5:
                 types += 'Sparse Matrix'
             else:
-                if '/data_descr/types' in h5 and  \
-                            o in h5['/data_descr/types']:
+                if have_type and o in all_types:
                     types += h5['/data_descr/types'][o]
                 else:
                     t=h5['/data/' + o].dtype
