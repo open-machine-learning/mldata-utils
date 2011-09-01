@@ -1,3 +1,7 @@
+"""Test module.
+
+Coverts correctness and performance
+"""
 import random
 import os
 import unittest
@@ -13,6 +17,12 @@ from converter.basehandler import BaseHandler
 
 import converter
 import fileformat
+import sys
+import getopt
+import datetime
+import ml2h5
+
+__doc__
 
 FIXTURES = {
     'csv': '../fixtures/test.csv',
@@ -23,18 +33,19 @@ FIXTURES = {
     'h5': '../examples/uci-20070111-zoo.h5',
     'octave': '../fixtures/test.octave',
     'mat': '../fixtures/test.mat',
-#        'matlab': '../examples/PDXprecip.dat',
 
     'big-arff': '../fixtures/breastCancer.arff',
+    'big-csv': '../fixtures/breastCancer.csv',
+}
+
+RESULTS = {
+    'h5': '../fixtures/res.h5',
+    'generic': '../fixtures/res.',           
 }
 
 class TestConversion(unittest.TestCase):
     fixtures = FIXTURES
-
-    result = {
-        'h5': '../fixtures/res.h5',
-        'generic': '../fixtures/res.',
-    }
+    result = RESULTS
     
     def assertCanRead(self, filename, Con):
         conv = Con(filename)
@@ -103,7 +114,8 @@ class TestConversion(unittest.TestCase):
         
     @unittest.skipUnless(os.path.exists(FIXTURES['big-arff']),"No big arff in fixtures")
     def test_bigarff2h5(self):
-        self.conversion_in(self.fixtures['big-arff'],self.result['h5'])
+#        self.conversion_in(self.fixtures['big-arff'],self.result['h5'])
+        self.conversion_in(self.fixtures['big-csv'],self.result['h5'])
         
     def test_libsvm2h5(self):
         self.conversion_in(self.fixtures['libsvm'],self.result['h5'])
@@ -137,6 +149,112 @@ class TestConversion(unittest.TestCase):
         self.conversion_out("octave",H5_OCTAVE)
         self.conversion_out("mat",H5_MAT)
         
+class PerformanceTests:
+    def generate_arff(self, fname, attributes=20000, instances=1):
+        """Generates the test arff file of given size
+    
+        @param fname: filename of new file
+        @type fname: string
+        @param attributes: num of attributes
+        @type attributes: integer
+        @param instances: num of instances
+        @type instances: integer
+        """
+        f = open(filename, 'w')
+        f.write("@relation 'rel'\n\n")
+        for i in range(0,n):
+            f.write("@attribute a%d numeric\n" % i)
+
+        f.write("\n@data\n")
+        for i in range(0,n):
+            if i > 0:
+                f.write(",")
+            if i%100 == 0:
+                f.write("%d" % i)
+            else:
+                f.write("%f" % float(i))
+        f.write("\n")
+        f.close()
+        
+    def setUp(self):
+        """Set up the testing enviroment
+        """
+        if not os.path.exists(FIXTURES['big-arff']):
+            self.generate_arff(FIXTURES['big-arff'], instances=20000)
+            
+    def __init__(self):
+        """Initialize by setting up the testing enviroment
+        """
+        self.setUp()
+        
+    def start_test(self, name=""):
+        """Name the test and record current time.
+
+        @param name: test name
+        @type name: string
+        @return: test name display string
+        @rtype: string
+        """
+        self._start = datetime.datetime.now()
+        return name
+        
+    def stop_test(self):
+        """Gets the running time since the last start_test
+
+        @return: time delta since start
+        @rtype: datatime.delta
+        """
+        return (datetime.datetime.now() - self._start)
+
+    def test_many_attributes_conversion(self):
+        """Measure time of arff -> h5 conversion
+        """
+        print self.start_test("Arff conversion")
+
+        conv = converter.Converter(FIXTURES['big-arff'], RESULTS['h5'])
+        conv.run(verify=True)
+
+        print self.stop_test()
+        
+    def test_many_attributes_types(self):
+        """Measure time of getting the attributes
+        """
+        print self.start_test("Many attributes - get types")
+
+        ml2h5.data.get_attribute_types(RESULTS['h5'])
+
+        print self.stop_test()
+        
+    def main(self):
+        """Run tests
+        TODO: Should be more generic similar to unittest module
+        """
+        self.test_many_attributes_conversion()
+        self.test_many_attributes_types()
+        
+def main():
+    # parse command line options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.error, msg:
+        print msg
+        print "for help use --help"
+        sys.exit(2)
+    # process options
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            print """
+            Usage:
+              python tests.py             - runs correctness tests
+              python tests.py performance - runs performance tests
+            """
+            sys.exit(0)
+    
+    if sys.argv < 1:
+        unittest.main()
+    elif args[0]=="performance":
+        per = PerformanceTests()
+        per.main()
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
