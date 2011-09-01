@@ -160,7 +160,7 @@ class PerformanceTests:
         @param instances: num of instances
         @type instances: integer
         """
-        f = open(filename, 'w')
+        f = open(fname, 'w')
         f.write("@relation 'rel'\n\n")
         for i in range(0,n):
             f.write("@attribute a%d numeric\n" % i)
