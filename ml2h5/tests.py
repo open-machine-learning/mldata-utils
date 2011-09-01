@@ -162,25 +162,26 @@ class PerformanceTests:
         """
         f = open(fname, 'w')
         f.write("@relation 'rel'\n\n")
-        for i in range(0,n):
+        for i in range(0,attributes):
             f.write("@attribute a%d numeric\n" % i)
 
         f.write("\n@data\n")
-        for i in range(0,n):
-            if i > 0:
-                f.write(",")
-            if i%100 == 0:
-                f.write("%d" % i)
-            else:
-                f.write("%f" % float(i))
-        f.write("\n")
+        for j in range(0,instances):
+            for i in range(0,attributes):
+                if i > 0:
+                    f.write(",")
+                if i%100 == 0:
+                    f.write("%d" % i)
+                else:
+                    f.write("%f" % float(i))
+            f.write("\n")
         f.close()
         
     def setUp(self):
         """Set up the testing enviroment
         """
         if not os.path.exists(FIXTURES['big-arff']):
-            self.generate_arff(FIXTURES['big-arff'], instances=20000)
+            self.generate_arff(FIXTURES['big-arff'])
             
     def __init__(self):
         """Initialize by setting up the testing enviroment
@@ -232,6 +233,10 @@ class PerformanceTests:
         self.test_many_attributes_conversion()
         self.test_many_attributes_types()
         
+__usage__ = """Usage:
+  python tests.py             - runs correctness tests
+  python tests.py performance - runs performance tests
+"""
 def main():
     # parse command line options
     try:
@@ -243,11 +248,7 @@ def main():
     # process options
     for o, a in opts:
         if o in ("-h", "--help"):
-            print """
-            Usage:
-              python tests.py             - runs correctness tests
-              python tests.py performance - runs performance tests
-            """
+            print __usage__
             sys.exit(0)
     
     if sys.argv < 1:
@@ -255,6 +256,8 @@ def main():
     elif args[0]=="performance":
         per = PerformanceTests()
         per.main()
+    else:
+        print __usage__
 
 if __name__ == '__main__':
     main()
