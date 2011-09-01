@@ -17,4 +17,8 @@ release: dist
 dist:
 	@python setup.py sdist --force-manifest --dist-dir=$(RELEASES) --formats=bztar
 
-all: dist
+clean:
+	find ./ -name '*.pyc' -delete
+	find ./ -name '*.swp' -delete
+
+all: dist clean
