@@ -1,0 +1,88 @@
+================================
+ mldata-utils developer's guide
+================================
+:Info: See <https://github.com/open-machine-learning/mldata-utils> for the git
+       repository.
+:Version: 0.1
+
+Introduction
+============
+Mldata-utils is set of tools which supplement mldata.org functionality. The
+main goal is to separate mathematical logic and data representation of the
+website into a different module, so that mldata project constitutes only
+presentation and model layers.
+
+Currently mldata-utils is responsible for:
+1. File-related issues, such as
+    * dataset conversion,
+    * information retrieval,
+    * implementation of mldata flavor of h5,
+2. Evaluation of predictions for Tasks provided by users
+    * definition of evaluation functions
+3. Client for connection with mldata without using a browser.
+
+
+ml2h5: Data conversion
+======================
+Module encapsulates various conversion libraries. It manages many file formats
+and gives simple interface for using them. We can for instance convert files
+by running:
+> from ml2h5.converter import Converter
+> conv = Converter("input.arff","output.arff")
+> conv.run()
+
+Note that unlike to mldata website, here conversions are done directly (without
+conversion to h5 first).
+
+For detailed information about accepted parameters go to Converter and run
+definitions.
+
+Another useful application of ml2h5 is possibility to load different files into
+the same data structure defined in ml2h5.converter.basehandler.
+
+
+clientapi: Access without a browser
+===================================
+Client API may be used to derive mldata content through shell.
+
+Using this module one can easily evaluate results. Example:
+
+> python mlprocess.py pima_task.h5 pima.h5 pima_preds.txt
+
+where pima_preds.txt is prediction file for pima task.
+
+
+mleval: Evaluation functions
+============================
+Module is used for evaluating results. First it is constituted
+of parser (of user's input) and real evaluator.
+
+Evaluation functions are separated into three modules:
+* classification,
+* regression,
+* multiclass (regression).
+
+In order to add new function it is sufficient to wrtie it in
+one of the files followed by register:
+> register(pm, 'Evaluation Method Name', evaluation_method_function)
+
+it uses util function (from util.py) to create evaluation object. 
+
+
+Miscellaneous
+=============
+List of other things used in the project.
+
+=================  ===========================================================
+Directory          Description
+=================  ===========================================================
+examples           Contains files for testing tools manually
+fixtures           Contains files for automatic tests
+scripts            Various scripts for one-time data conversion (not worth
+                   putting into ml2h5, but maybe valuable one day in the
+                   future)
+main directory     
+  Makefile         Makefile for installing scripts directly on mldata.org
+  setup.py         Python installation script
+  % OTHER          Documentation files
+=================  ===========================================================

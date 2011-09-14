@@ -2,3 +2,23 @@ This package supplements http://mldata.org and should give you all tools
 necessary to work with Data, Task and Solution.
 
 See INSTALL for installation details.
+
+--------------------------
+Data conversions supported
+--------------------------
+
+I: Import to hdf5 
+E: Export from hdf5 
+
+       | I | E |
+arff   | Y | Y |
+csv    | Y | Y |
+libsvm | Y | Y |
+matlab | Y | Y |
+R      | Y | N |
+uci    | N | Y |
+
+Known issues:
+libsvn - empty labels are not handled
+csv    - only ',' works as separator
+arff   - only ',' works as separator

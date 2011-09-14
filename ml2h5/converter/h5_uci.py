@@ -110,6 +110,7 @@ class H5_UCI(BaseHandler):
 
 
     def read(self):
+        data = {}
         ordering = []
         predata = self._parse()
 
@@ -119,7 +120,7 @@ class H5_UCI(BaseHandler):
             # everything is nan -> keep as str
             try:
                 all_is_nan = numpy.isnan(arr).all()
-            except AttributeError:
+            except Exception:
                 all_is_nan = False
 
             if all_is_nan:
