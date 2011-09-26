@@ -1,6 +1,7 @@
 import multiclass
 import classification
 import regression
+import other
 
 """
 dictionaries of known performance measures:
@@ -24,4 +25,5 @@ register(pm, 'Balanced Error', calcbal)
 
 pm_hierarchy = { 'Regression': regression.pm,
                  'Binary Classification': classification.pm,
-                 'Multi Class Classification' : multiclass.pm}
+                 'Multi Class Classification' : multiclass.pm,
+                 'Other' : other.pm}

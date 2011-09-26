@@ -21,6 +21,8 @@ import sys
 import getopt
 import datetime
 import ml2h5
+from mleval import other
+import numpy
 
 __doc__
 
@@ -148,7 +150,7 @@ class TestConversion(unittest.TestCase):
         #self.conversion_out("data",H5_UCI)
         self.conversion_out("octave",H5_OCTAVE)
         self.conversion_out("mat",H5_MAT)
-        
+
 class PerformanceTests:
     def generate_arff(self, fname, attributes=20000, instances=1):
         """Generates the test arff file of given size
@@ -251,7 +253,7 @@ def main():
             print __usage__
             sys.exit(0)
     
-    if sys.argv < 1:
+    if len(sys.argv) <= 1:
         unittest.main()
     elif args[0]=="performance":
         per = PerformanceTests()
