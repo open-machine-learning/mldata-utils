@@ -153,4 +153,4 @@ def compare_objects(N,M):
             
     return correct, preds
 
-register(pm, 'VOC detection', voc_detection)
+register(pm, 'VOC bounding box', voc_detection)
