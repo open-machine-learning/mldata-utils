@@ -46,6 +46,15 @@ class ConversionError(Exception):
         print self.value
 
 
+class ConversionUnsupported(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+    def print_error(self):
+        print self.value
+
+
 class Converter(object):
     """Convert and verify conversion.
 
@@ -109,7 +118,7 @@ class Converter(object):
             if self.format_out == 'csv':
                 self.handler_out.attribute_names_first = attribute_names_first
         except KeyError:
-            raise ConversionError(
+            raise ConversionUnsupported(
                 'Unknown conversion pair %s to %s!' % (self.format_in, self.format_out))
         except Exception, e: # reformat all other exceptions to ConversionError
             raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
