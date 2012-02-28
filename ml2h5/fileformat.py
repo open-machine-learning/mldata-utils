@@ -25,7 +25,9 @@ def _try_suffix(fname):
         return 'csv', True
     #elif suffix in ('uci', 'data'):
     #    return 'uci', True
-    elif suffix in ('bz2', 'gz', 'zip'):
+    elif suffix in ('zip', 'tgz'):
+        return suffix, True
+    elif suffix in ('bz2', 'gz'):
         try:
             presuffix = fname.split('.')[-2]
             if presuffix == 'tar':
