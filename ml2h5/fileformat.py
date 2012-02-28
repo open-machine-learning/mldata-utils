@@ -162,9 +162,11 @@ def infer_seperator(fname):
 def get(fname, skip_suffix=False):
     """Get format of given file.
 
-    By suffix it detects: libsvm, arff, csv, h5, tar.gz, tar.bz2, zip,
+    By suffix it detects: libsvm, arff, csv, h5, tgz, tar.gz, tar.bz2, zip,
     matlab, octave.
     By deeper inspection it detects: h5, matlab, octave, arff, csv, libsvm
+
+    If format is not known, return the file extension.
 
     @param fname: name of file to determine format for
     @type fname: string
@@ -172,9 +174,9 @@ def get(fname, skip_suffix=False):
     @type skip_suffix: boolean
     """
     if not skip_suffix:
-        format, found = _try_suffix(fname)
+        extension, found = _try_suffix(fname)
         if found:
-            return format
+            return extension
 
     if _try_h5(fname): return 'h5'
     elif _try_matlab(fname): return 'matlab'
@@ -184,7 +186,7 @@ def get(fname, skip_suffix=False):
     elif _try_csv(fname): return 'csv'
     elif _try_arff(fname): return 'arff'
 
-    return 'unknown'
+    return extension
 
 
 def get_filename(orig):
