@@ -1,7 +1,7 @@
 .PHONY: dist release all
 
 #VERSION=$(shell awk --field-separator "'" '/VERSION/{print $$2;exit}' setup.py)
-VERSION=$(shell awk -F \' '/VERSION/{print $2;exit}' setup.py)
+VERSION=$(shell awk -F \' '/VERSION/{print $$2;exit}' setup.py)
 TARBALL="mldata-utils-$(VERSION).tar.bz2"
 RELEASES="../releases"
 HOST=mldata.org
