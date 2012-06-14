@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""Convert from one supported format to another"""
+"""Convert from one supported format to another.
+
+Example usage:
+python validate.py mydata.h5
+python validate.py otherdata.arff
+python validate.py problemdata.h5 output.csv
+"""
 
 import sys
 import ml2h5.fileformat
@@ -24,7 +30,7 @@ converter_factory = {'h5': BaseHandler,
                      }
 
 def usage():
-    print """Usage: """ + sys.argv[0] + """ <filename>"""
+    print """Usage: """ + sys.argv[0] + """ filename [filename_out]"""
 
 def convert(file_in, file_out):
     """Convert mldata data file from file_in to file_out.
