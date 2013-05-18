@@ -17,14 +17,14 @@ from gettext import gettext as _
 from scipy.sparse import csc_matrix
 
 import ml2h5.fileformat
-from h5_arff import H5_ARFF
-from h5_libsvm import H5_LibSVM
-from h5_csv import H5_CSV
-from h5_mat import H5_MAT
-from h5_octave import H5_OCTAVE
-from h5_rdata import H5_RData
+from .h5_arff import H5_ARFF
+from .h5_libsvm import H5_LibSVM
+from .h5_csv import H5_CSV
+from .h5_mat import H5_MAT
+from .h5_octave import H5_OCTAVE
+from .h5_rdata import H5_RData
 #from h5_uci import H5_UCI
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 
 HANDLERS = {
     'libsvm': H5_LibSVM,
@@ -43,7 +43,7 @@ class ConversionError(Exception):
     def __str__(self):
         return repr(self.value)
     def print_error(self):
-        print self.value
+        print(self.value)
 
 
 class ConversionUnsupported(Exception):
@@ -52,7 +52,7 @@ class ConversionUnsupported(Exception):
     def __str__(self):
         return repr(self.value)
     def print_error(self):
-        print self.value
+        print(self.value)
 
 
 class Converter(object):
@@ -120,14 +120,14 @@ class Converter(object):
         except KeyError:
             raise ConversionUnsupported(
                 'Unknown conversion pair %s to %s!' % (self.format_in, self.format_out))
-        except Exception, e: # reformat all other exceptions to ConversionError
-            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
+        except Exception as e: # reformat all other exceptions to ConversionError
+            raise ConversionError(ConversionError(str(e))).with_traceback(sys.exc_info()[2])
 
     def read(self):
         try:
             return self.handler_in.read()
-        except Exception, e: # reformat all exceptions to ConversionError
-            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
+        except Exception as e: # reformat all exceptions to ConversionError
+            raise ConversionError(ConversionError(str(e))).with_traceback(sys.exc_info()[2])
 
     def run(self, verify=False, remove_out=True):
         """Convert to/from HDF5.
@@ -146,12 +146,12 @@ class Converter(object):
             if self.format_in == 'h5' and self.format_out == 'xml':
                 cmd = 'h5dump --xml ' + self.fname_in + ' > ' + self.fname_out
                 if not subprocess.call(cmd, shell=True) == 0:
-                    raise ConversionError, 'Failed conversion of %s to XML' % (self.fname_in)
+                    raise ConversionError('Failed conversion of %s to XML' % (self.fname_in))
             else:
                 data = self.handler_in.read()
                 self.handler_out.write(data)
-        except Exception, e: # reformat all exceptions to ConversionError
-            raise ConversionError, ConversionError(str(e)), sys.exc_info()[2]
+        except Exception as e: # reformat all exceptions to ConversionError
+            raise ConversionError(ConversionError(str(e))).with_traceback(sys.exc_info()[2])
 
 
     def _compare(self, A, B):
@@ -174,8 +174,8 @@ class Converter(object):
                 return False
 
         if type(A[0])==numpy.ndarray:
-            xrange_A0 = xrange(len(A[0]))
-            for i in xrange(len(A)):
+            xrange_A0 = range(len(A[0]))
+            for i in range(len(A)):
                 Ai = A[i]
                 Bi = B[i]
                 for j in xrange_A0:
@@ -191,7 +191,7 @@ class Converter(object):
                A.shape != B.shape:
                    return False
 
-            for j in xrange(len(A)):
+            for j in range(len(A)):
                 try:
                     if abs(A[j] - B[j]) > EPSILON:
                         return False
@@ -215,7 +215,7 @@ class Converter(object):
         data_in = self.handler_in.read()
         data_out = self.handler_out.read()
         
-        for i in xrange(len(data_in['ordering'])):
+        for i in range(len(data_in['ordering'])):
             name_in = data_in['ordering'][i]
             name_out = data_out['ordering'][i]
             if not self._compare(data_in['data'][name_in], data_out['data'][name_out]):

@@ -1,6 +1,6 @@
 import numpy, h5py, os, copy, numpy
 from scipy.sparse import csc_matrix
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 import ml2h5.converter
 
 COMMENT = '# '
@@ -54,12 +54,12 @@ class H5_CSV(BaseHandler):
                 names = l
                 anf = False
             else:
-                l = map(self._find_nan, l)
+                l = list(map(self._find_nan, l))
                 parsed.append(l)
         infile.close()
         A = numpy.matrix(parsed).T
 
-        for i in xrange(A.shape[0]):
+        for i in range(A.shape[0]):
             items = A[i].tolist()[0]
             t = self.get_datatype(items)
             if t == numpy.int32:
@@ -97,14 +97,14 @@ class H5_CSV(BaseHandler):
         l=l.pop()
 
         csv = open(self.fname, 'w')
-        for i in xrange(l):
+        for i in range(l):
             line=[]
             for o in data['ordering']:
                 d=data['data'][o]
                 if type(d)==csc_matrix:
                     raise ml2h5.converter.ConversionError("Sparse matrices are not supported in CSV files")
                 try:
-                    line.extend(map(str, d[:,i]))
+                    line.extend(list(map(str, d[:,i])))
                 except:
                     try:
                         if len(d[i]):

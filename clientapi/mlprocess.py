@@ -24,7 +24,7 @@ def init_svm(task_type, kernel, labels):
         svm=LibSVR(C, epsilon, kernel, labels)
         svm.set_tube_epsilon(tube_epsilon)
     else:
-        print task_type + ' unknown!'
+        print(task_type + ' unknown!')
 
     return svm
 
@@ -80,8 +80,8 @@ def mlprocess(task_filename, data_filename, pred_filename, verbose=True):
     label_train = outputs.str2label(train_lab)
 
     if verbose:
-        print 'Number of features: %d' % train_ex.shape[0]
-        print '%d training examples, %d test examples' % (len(train_lab), len(test_lab))
+        print('Number of features: %d' % train_ex.shape[0])
+        print('%d training examples, %d test examples' % (len(train_lab), len(test_lab)))
 
     feats_train = RealFeatures(train_ex)
     feats_test = RealFeatures(test_ex)
@@ -106,7 +106,7 @@ def mlprocess(task_filename, data_filename, pred_filename, verbose=True):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) != 4:
-        print 'Usage: python %s task_file.h5 data_file.h5 preds.txt' %sys.argv[0]
+        print('Usage: python %s task_file.h5 data_file.h5 preds.txt' %sys.argv[0])
         exit(1)
     task_filename = sys.argv[1]
     data_filename = sys.argv[2]

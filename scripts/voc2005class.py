@@ -9,7 +9,7 @@ reg_rect = "\"(?P<name>.*)\" \(.*\) : \((?P<xmin>[0-9]*), (?P<ymin>[0-9]*)\) - \
 
 reg_filename = "filename : \"(?P<filename>.*)\""
 res = {}
-FILES = range(0,10000)
+FILES = list(range(0,10000))
 T = {}
 
 MAP = {
@@ -58,7 +58,7 @@ def parse_labels(filename):
 
         if m:
             name = m.group('name')
-            if not res.has_key(imgfile):
+            if imgfile not in res:
                 res[imgfile] = {}
 #            if not res[cls].has_key(imgfile):
             res[imgfile][MAP[name]] = 1
@@ -71,20 +71,20 @@ for dirname in os.listdir("."):
         if filename.split(".")[1] == "txt":
             parse_labels(dirname + "/" + filename)
 
-print "@relation classification\n"
-print "@attribute image string"
-CLSS = [key for key in T.keys() if not key == "dummy"]
+print("@relation classification\n")
+print("@attribute image string")
+CLSS = [key for key in list(T.keys()) if not key == "dummy"]
 for key in CLSS:
-    print "@attribute %s numeric" % (key)
+    print("@attribute %s numeric" % (key))
 
-print "\n@data"
+print("\n@data")
 
-for key in res.keys():
+for key in list(res.keys()):
     line = "'" + key + "',"
     for cls in CLSS:
-        if res[key].has_key(cls):
+        if cls in res[key]:
             line += res[key][cls].__str__() + ","
         else:
             line += "-1,"
     line = line[:-1]
-    print line
+    print(line)

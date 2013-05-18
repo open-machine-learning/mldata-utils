@@ -7,8 +7,9 @@ This module heavily relies on the functionality required for http://mldata.org
 import h5py, numpy, os, copy, tarfile, zipfile, bz2, gzip
 from scipy.sparse import csc_matrix
 
-import fileformat, converter
+from . import fileformat, converter
 from . import NUM_EXTRACT, LEN_EXTRACT
+from __future__ import unicode_literals
 
 def get_num_instattr(fname):
     """Retrieve number of instances and number of attributes from given HDF5 file.
@@ -93,7 +94,7 @@ def _get_extract_data(h5):
                     overwidth=True    
                 # reduce rows
 
-                for i in xrange(len(indptr)-1):
+                for i in range(len(indptr)-1):
                     for j in range(indptr[i],indptr[i+1]):   
                         if indices[j]>=NUM_EXTRACT:   
                             indptr[i+1:]-=numpy.ones(len(indptr[i+1:]))
@@ -117,9 +118,9 @@ def _get_extract_data(h5):
                     if last > NUM_EXTRACT: 
                         last = NUM_EXTRACT
                         overlength=True
-                    app_lines=xrange(len(h5[dset]))
+                    app_lines=range(len(h5[dset]))
                     if len(app_lines) + cur_line > NUM_EXTRACT: 
-                        app_lines = xrange(NUM_EXTRACT - cur_line )
+                        app_lines = range(NUM_EXTRACT - cur_line )
                         overwidth=True 
                     for i in app_lines:
                         extract.append(h5[dset][i][:last])
@@ -197,7 +198,7 @@ def get_extract(fname):
     if '/data_descr/names' in h5:
         extract['names'] = h5['/data_descr/names'][:].tolist()[:NUM_EXTRACT]
         extract['names_cut'] = copy.copy(extract['names'])
-        for i in xrange(len(extract['names_cut'])):
+        for i in range(len(extract['names_cut'])):
             if len(extract['names_cut'][i]) > LEN_EXTRACT: 
                 extract['names_cut'][i] = extract['names_cut'][i][:LEN_EXTRACT-2] + '...'
         if len(list(h5['/data_descr/names'])) > NUM_EXTRACT:
@@ -272,7 +273,7 @@ def get_unparseable(fname):
                 if i > NUM_EXTRACT:
                     break
             f.close()
-            data = u"\n".join(data)
+            data = "\n".join(data)
 
     return {'data': [[intro, data]]}
 
@@ -362,7 +363,7 @@ def _find_dset(fname, output_variables):
                 (h5['/data/data'], h5['/data/indices'], h5['/data/indptr'])
             )
             if ov == 0:
-                for i in xrange(A.shape[0]):
+                for i in range(A.shape[0]):
                     if ov == 0:
                         dset = A[i].todense().tolist()
                         break # inner loop
@@ -377,7 +378,7 @@ def _find_dset(fname, output_variables):
                 else:
                     ov -= 1
             else: # datasets with shape (x,y)
-                for i in xrange(len(data)):
+                for i in range(len(data)):
                     if ov == 0:
                         dset = data[i].tolist()
                         break # inner loop

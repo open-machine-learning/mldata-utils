@@ -19,8 +19,8 @@ for subdir, dirs, files in os.walk('.'):
         f=open(file, 'r')
         lines=f.readlines()
 
-        if not res.has_key(cls):
-            res[cls] = range(0,SIZE)
+        if cls not in res:
+            res[cls] = list(range(0,SIZE))
 
         for line in lines:
             id,val = line.strip().replace("  "," ").split(" ")
@@ -28,17 +28,17 @@ for subdir, dirs, files in os.walk('.'):
             if maxint < int(id):
                 maxint = int(id)
 
-print "@relation classification\n"
-print "@attribute image string"
-KEYS=res.keys()
+print("@relation classification\n")
+print("@attribute image string")
+KEYS=list(res.keys())
 for key in KEYS:
-    print "@attribute %s numeric" % (key)
+    print("@attribute %s numeric" % (key))
 
-print "\n@data"
+print("\n@data")
 
 for i in range(1,SIZE):
     line = "'%06d'," % (i,)
     for cls in KEYS:
         line += res[cls][i].__str__() + ","
     line = line[:-1]
-    print line
+    print(line)

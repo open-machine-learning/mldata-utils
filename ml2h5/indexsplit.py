@@ -182,12 +182,12 @@ def check_split_intersec(split_lists):
 
 
 def main():
-    print check_split_str("1,2,3,4,5:7,27,28:32,32:30")
+    print(check_split_str("1,2,3,4,5:7,27,28:32,32:30"))
     x = reduce_split_str("0, 53,55,55 ,55:60,57, 61:62")
-    print x
+    print(x)
     y= expand_split_str("1,2,3:7,27:33")
-    print y
-    print check_split_intersec([[[1,2],[3,4]],[[5,6],[1,8],[1,2]]])
+    print(y)
+    print(check_split_intersec([[[1,2],[3,4]],[[5,6],[1,8],[1,2]]]))
     
 
 if __name__=="__main__":

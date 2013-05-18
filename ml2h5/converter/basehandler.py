@@ -55,7 +55,7 @@ class BaseHandler(object):
         @type msg: string
         """
         return
-        print 'WARNING: ' + msg
+        print('WARNING: ' + msg)
 
     def _convert_to_ndarray(self,path,val):
         """converts a attribut to a set of ndarrays depending on the datatype  
@@ -99,7 +99,7 @@ class BaseHandler(object):
         assert(len(l)==1)
         l=l.pop()
 
-        for i in xrange(l):
+        for i in range(l):
             line=[]
             for o in data['ordering']:
                 try:
@@ -119,13 +119,13 @@ class BaseHandler(object):
         return str(os.path.basename(self.fname).split('.')[0])
 
     def get_data_group(self, data):
-        if data and data.has_key('group'):
+        if data and 'group' in data:
             return data['group']
         else:
             return 'data'
 
     def get_descr_group(self, data):
-        if data and data.has_key('group'):
+        if data and 'group' in data:
             return data['group'] + '_descr'
         else:
             return 'data_descr'
@@ -329,7 +329,7 @@ class BaseHandler(object):
 
         try:
             group = h5.create_group('/%s' % data_group)
-            for path, val in data[data_group].iteritems():
+            for path, val in data[data_group].items():
                 for path, val in self._convert_to_ndarray(path,val):
                     group.create_dataset(path, data=val, compression=self.compression)
 

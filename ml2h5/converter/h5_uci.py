@@ -1,5 +1,5 @@
 import os, numpy
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 
 
 class H5_UCI(BaseHandler):
@@ -40,7 +40,7 @@ class H5_UCI(BaseHandler):
         line=line.strip()
         items = line.split()
 
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             if '\t' in items[i]:
                 old=items.pop(i)
                 new=old.split()
@@ -55,12 +55,12 @@ class H5_UCI(BaseHandler):
 
         conc_item_idx=line
         conc_start=None
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             if marker_start == -1 or marker_stop == -1:
                 return items
 
             if conc_start and '"' in items[i]:
-                for j in xrange(conc_start, i+1):
+                for j in range(conc_start, i+1):
                     items.pop(conc_start)
                 conc_str=line[marker_start+1:marker_stop]
                 marker_start=line.find('"', marker_stop+1)
@@ -90,10 +90,10 @@ class H5_UCI(BaseHandler):
 
             if not num_items: # do some init
                 num_items = len(items)
-                for i in xrange(num_items):
+                for i in range(num_items):
                     data.append([])
 
-            for i in xrange(len(items)):
+            for i in range(len(items)):
                 item = items[i].strip()
                 if not item:
                     continue
@@ -114,7 +114,7 @@ class H5_UCI(BaseHandler):
         ordering = []
         predata = self._parse()
 
-        for i in xrange(len(predata)):
+        for i in range(len(predata)):
             arr = numpy.array(predata[i])
 
             # everything is nan -> keep as str

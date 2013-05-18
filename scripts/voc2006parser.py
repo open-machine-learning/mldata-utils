@@ -33,21 +33,21 @@ def parse_labels(filename):
             ymin = m.group('ymin')
             xmax = m.group('xmax')
             ymax = m.group('ymax')
-            print "'%s','%s','%s',%s,%s,%s,%s,%s" % (imgfile,name,pose,difficult,xmin,ymin,xmax,ymax)
+            print("'%s','%s','%s',%s,%s,%s,%s,%s" % (imgfile,name,pose,difficult,xmin,ymin,xmax,ymax))
 
 def print_attr_names(parse_labels):
     if parse_labels:
-        print "@relation labels\n"
+        print("@relation labels\n")
         attr = ["id","name","pose","difficult","xmin","ymin","xmax","ymax"]
         attr_types = ["string","string","string","numeric","numeric","numeric","numeric","numeric"]
     else:
-        print "@relation images\n"
+        print("@relation images\n")
         attr = ["id","database","annotation","image","imageid","ownername","ownerid","width","height","depth"]
         attr_types = ["string","string","string","string","string","string","string","numeric","numeric","numeric"]
 
     for key in range(0,len(attr)):
-        print "@attribute %s %s" % (attr[key], attr_types[key])
-    print "\n@data"
+        print("@attribute %s %s" % (attr[key], attr_types[key]))
+    print("\n@data")
 
 print_attr_names(1)
 

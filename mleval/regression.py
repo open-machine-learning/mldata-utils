@@ -1,5 +1,5 @@
 import numpy
-from util import register
+from .util import register
 
 pm = dict() # regression measures
 

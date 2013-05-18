@@ -2,7 +2,7 @@ import h5py, numpy
 import rpy2.robjects as robjects
 import rpy2.robjects.numpy2ri
 import rpy2.rlike.container as rlc
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 
 
 class H5_RData(BaseHandler):
@@ -13,7 +13,7 @@ class H5_RData(BaseHandler):
 
 
     def read(self):
-        raise "Not supported..."
+        raise Exception("Not supported...")
 
 
     def write(self, data):
@@ -43,6 +43,6 @@ class H5_RData(BaseHandler):
             dest[data['name']] = robjects.DataFrame(rlc.OrdDict(attrlist))
         elif group == 'task':
             d=data[group]
-            for k in d.keys():
+            for k in list(d.keys()):
                 dest[k] = d[k]
         robjects.r.save(*list(robjects.r.ls(dest)), file=self.fname)

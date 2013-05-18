@@ -1,5 +1,5 @@
 import h5py, numpy
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 from scipy.sparse import csc_matrix
 import ml2h5.converter
 
@@ -38,9 +38,9 @@ class H5_OCTAVE(BaseHandler):
         # throw conversion exceptions ?
         if meta==None:
             return None
-        if not meta.has_key('name'):
+        if 'name' not in meta:
             return None
-        if not meta.has_key('dtype'):
+        if 'dtype' not in meta:
             return None
 
         if meta['dtype']=='scalar':
@@ -85,7 +85,7 @@ class H5_OCTAVE(BaseHandler):
         while line and line.startswith('#'):
             sp=line.split(': ')
             if sp[0]=='# name':
-                if meta.has_key('name'):
+                if 'name' in meta:
                     break
                 meta['name']=sp[1][:-1]
 
@@ -391,9 +391,9 @@ class H5_OCTAVE(BaseHandler):
             indptr=attr.indptr
             indices=attr.indices
 
-            for i in xrange(attr.shape[1]):
+            for i in range(attr.shape[1]):
                 out=[]
-                for j in xrange(indptr[i],indptr[i+1]):
+                for j in range(indptr[i],indptr[i+1]):
                     if dat[j]==int:
                         out.append("%d %d %d\n" % (indices[j]+1, i+1, dat[j]))
                     else:

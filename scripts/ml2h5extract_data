@@ -7,7 +7,7 @@ import sys
 import ml2h5.data
 
 def usage():
-    print """Usage: """ + sys.argv[0] + """ <filename>"""
+    print("""Usage: """ + sys.argv[0] + """ <filename>""")
 
 
 if __name__ == "__main__":
@@ -16,4 +16,4 @@ if __name__ == "__main__":
         usage()
         sys.exit(1)
 
-    print ml2h5.data.get_extract(sys.argv[1])
+    print(ml2h5.data.get_extract(sys.argv[1]))

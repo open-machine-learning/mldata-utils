@@ -30,13 +30,13 @@ converter_factory = {'h5': BaseHandler,
                      }
 
 def usage():
-    print """Usage: """ + sys.argv[0] + """ filename [filename_out]"""
+    print("""Usage: """ + sys.argv[0] + """ filename [filename_out]""")
 
 def convert(file_in, file_out):
     """Convert mldata data file from file_in to file_out.
     Only format conversion and check that output file can be read.
     """
-    print 'Converting ' + file_in + ' to ' + file_out
+    print('Converting ' + file_in + ' to ' + file_out)
     format_out = ml2h5.fileformat.get(file_out)
     conv = ml2h5.converter.Converter(file_in, file_out)
     conv.run(verify=True)
@@ -51,12 +51,12 @@ def validate(filename):
             try:
                 convert(filename, 'validated.' + format_out)
             except:
-                print 'Conversion failed'
+                print('Conversion failed')
     elif format_in in ml2h5.converter.TO_H5:
         try:
             convert(filename, 'validated.h5')
         except:
-            print 'Conversion failed'
+            print('Conversion failed')
 
 if __name__ == '__main__':
     argc = len(sys.argv)

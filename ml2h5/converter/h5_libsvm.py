@@ -1,6 +1,6 @@
 import numpy, h5py, os, copy
 from scipy.sparse import csc_matrix
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
 import ml2h5.converter
 
 
@@ -45,7 +45,7 @@ class H5_LibSVM(BaseHandler):
 
         label = []
 
-        for line in file(self.fname).xreadlines():
+        for line in file(self.fname):
             items = line.split()
             lab=items[0]
             dat=items[1:]
@@ -105,7 +105,7 @@ class H5_LibSVM(BaseHandler):
 
         libsvm = open(self.fname, 'w')
 
-        if 'label' in data['data'].keys():
+        if 'label' in list(data['data'].keys()):
             if type(data['data']['label']) == csc_matrix:
                 self.is_multilabel = True
             else:
@@ -121,7 +121,7 @@ class H5_LibSVM(BaseHandler):
         assert(len(l)==1)
         l=l.pop()
 
-        for i in xrange(l):
+        for i in range(l):
             out = []
             for o in ordering:
                 d=data['data'][o]
@@ -131,7 +131,7 @@ class H5_LibSVM(BaseHandler):
                         indptr=d.indptr
                         indices=d.indices
                         dat=d.data
-                        for j in xrange(indptr[i],indptr[i+1]):
+                        for j in range(indptr[i],indptr[i+1]):
                             labels.append(str(indices[j]))
 
                         out.append(','.join(labels))
@@ -142,13 +142,13 @@ class H5_LibSVM(BaseHandler):
                         indptr=d.indptr
                         indices=d.indices
                         dat=d.data
-                        for j in xrange(indptr[i],indptr[i+1]):
+                        for j in range(indptr[i],indptr[i+1]):
                             if dat[j]==int:
                                 out.append('%d:%d' % (indices[j]+1,dat[j]))
                             else:
                                 out.append('%d:%.15g' % (indices[j]+1,dat[j]))
                     else: # dense
-                        for j in xrange(len(d)):
+                        for j in range(len(d)):
                             out.append(str(j+1) + ':' + str(d[j,i]))
             libsvm.write(" ".join(out) + "\n")
 

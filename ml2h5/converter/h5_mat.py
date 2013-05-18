@@ -1,6 +1,14 @@
 import h5py, numpy
 from scipy.io import savemat, loadmat
-from basehandler import BaseHandler
+from .basehandler import BaseHandler
+
+import sys
+if sys.version < '3':
+    def u(x):
+        return unicode(x)
+else:
+    def u(x):
+        return str(x)
 
 
 class H5_MAT(BaseHandler):
@@ -18,10 +26,10 @@ class H5_MAT(BaseHandler):
                 struct_as_record=True)
 
         for k in ('__header__', '__globals__', '__version__'):
-            if matf.has_key(k):
+            if k in matf:
                 del matf[k]
 
-        for k in matf.keys():
+        for k in list(matf.keys()):
             if matf[k].dtype == numpy.object: # asume cell of strings
                 cell = []
                 for i in matf[k][0]:
@@ -34,12 +42,12 @@ class H5_MAT(BaseHandler):
                 matf[k]=matf[k][0]
 
         data = matf
-        if matf.has_key('mldata_descr_ordering'):
+        if 'mldata_descr_ordering' in matf:
             ordering = matf['mldata_descr_ordering']
             del(matf['mldata_descr_ordering'])
             
         else:        
-            ordering = matf.keys()
+            ordering = list(matf.keys())
 
             def strip_type(x):
                 if x.startswith('double'):
@@ -63,19 +71,19 @@ class H5_MAT(BaseHandler):
     def write(self, data):
         group=self.get_data_group(data)
         d=data[group]
-        for k in d.keys():
+        for k in list(d.keys()):
             if type(d[k])==list and len(d[k])>0 and type(d[k][0])==str:
-                cell = array([ numpy.array(unicode(i)) for i in d[k] ], dtype=numpy.object)
+                cell = array([ numpy.array(u(i)) for i in d[k] ], dtype=numpy.object)
                 d[k] = cell
             elif type(d[k])==numpy.ndarray and len(d[k])>0 and type(d[k][0])==str:
                 cell = numpy.empty((1,len(d[k])), dtype=numpy.object)
-                for i in xrange(len(d[k])):
-                    cell[0,i]=numpy.array(unicode(d[k][i]), dtype='U')
+                for i in range(len(d[k])):
+                    cell[0,i]=numpy.array(u(d[k][i]), dtype='U')
                 d[k] = cell
             elif type(d[k])==numpy.ndarray and len(d[k])>0 and d[k][0].dtype == numpy.object:
                 cell = numpy.empty((1,len(d[k])), dtype=numpy.object)
-                for i in xrange(len(d[k])):
-                    cell[0,i]=numpy.array(unicode(d[k][i]), dtype='U')
+                for i in range(len(d[k])):
+                    cell[0,i]=numpy.array(u(d[k][i]), dtype='U')
                 d[k] = cell
 
         d['mldata_descr_ordering']=numpy.array(data['ordering'],dtype=numpy.object)

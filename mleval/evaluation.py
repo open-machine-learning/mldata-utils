@@ -1,7 +1,7 @@
-import multiclass
-import classification
-import regression
-import other
+from . import multiclass
+from . import classification
+from . import regression
+from . import other
 
 """
 dictionaries of known performance measures:

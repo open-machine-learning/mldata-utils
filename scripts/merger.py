@@ -2,12 +2,12 @@
 Merger for http://datam.i2r.a-star.edu.sg/datasets/krbd/OvarianCancer/OvarianCancer-NCI-QStar.html
 """
 
-print "@relation 'ovarian'\n"
+print("@relation 'ovarian'\n")
 files = 10
 
-f = range(0,files)
-fl = range(0,files)
-cur_line = range(0,files)
+f = list(range(0,files))
+fl = list(range(0,files))
+cur_line = list(range(0,files))
 
 for i in range(0,files):
     f[i] = open("all%d.arff" % (i))
@@ -16,11 +16,11 @@ for i in range(0,files):
     for line in fl[i]:
         j += 1
         if line[:5] == "@attr" and not line[:16] == "@attribute Class":
-            print line.strip().replace("@attribute ","@attribute A").replace(".","C")
+            print(line.strip().replace("@attribute ","@attribute A").replace(".","C"))
         if line[:5] == "@data":
             cur_line[i] = j
             break
-print "@attribute Class {Cancer,Normal}"
+print("@attribute Class {Cancer,Normal}")
 stop = False
 for j in range(0,100000):
     newline = ""
@@ -43,9 +43,9 @@ for j in range(0,100000):
         break
     
     if len(newline) > 200:
-        print newline[:-1]
+        print(newline[:-1])
     else:
-        print ""
+        print("")
 
 for i in range(0,files):
     f[i].close()

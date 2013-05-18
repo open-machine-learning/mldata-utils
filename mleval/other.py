@@ -5,7 +5,7 @@
 """
 
 import numpy
-from util import register
+from .util import register
 
 pm = dict()
 
@@ -48,7 +48,7 @@ def voc_detection(out, lab):
     while 1:
         # get part of matrix related to current image
         n1 = find_next_obj(lab,n0)
-        N = lab[range(n0,n1)]
+        N = lab[list(range(n0,n1))]
 
         # get part for the same image in result matrix
         if m0 < out.shape[0] and out[m0][0] == lab[n0][0]:
@@ -56,7 +56,7 @@ def voc_detection(out, lab):
         else:
             # if there is no such image in predictions just continue
             m1 = m0
-        M = out[range(m0,m1)]
+        M = out[list(range(m0,m1))]
 
         # compare predictions to ground truth
         c,p = compare_objects(N,M)
@@ -89,7 +89,7 @@ def intersection_area(r1,r2):
     """
         Calculates the area of intersection r1*r2
     """
-    r = range(0,4)
+    r = list(range(0,4))
     r[0] = max(r1[0],r2[0])
     r[1] = max(r1[1],r2[1])
     r[2] = min(r1[2],r2[2])
@@ -114,7 +114,7 @@ def vec_str2int(mat):
         Converts matrix of ints as strings into vector of ints
     """
     s = mat.shape[0]
-    r = range(0,s)
+    r = list(range(0,s))
     for i in range(0,s):
         r[i] = int(mat[i])
     return r
@@ -140,8 +140,8 @@ def compare_objects(N,M):
             # check if we are seeing the same object
             if N[i][1] == M[j][1]:
                 # if so, compare the areas
-                v1 = vec_str2int(N[i][range(2,6)])
-                v2 = vec_str2int(M[j][range(2,6)])
+                v1 = vec_str2int(N[i][list(range(2,6))])
+                v2 = vec_str2int(M[j][list(range(2,6))])
                 r = compare_rectangles(v1,v2)
                 
                 # store the best result

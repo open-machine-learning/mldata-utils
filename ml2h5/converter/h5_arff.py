@@ -1,6 +1,6 @@
 import h5py, numpy, copy
-import arff
-from basehandler import BaseHandler
+from . import arff
+from .basehandler import BaseHandler
 from scipy.sparse import csc_matrix
 import ml2h5.converter
 
@@ -44,10 +44,10 @@ class H5_ARFF(BaseHandler):
             data[name] = []
 
         for item in af.data:
-            for i in xrange(len(data)):
+            for i in range(len(data)):
                 data[names[i]].append(item[i])
         # conversion to proper data types
-        for name, values in data.iteritems():
+        for name, values in data.items():
             if af.attribute_types[name] == 'date':
                 t = self.str_type
             else:
@@ -67,7 +67,7 @@ class H5_ARFF(BaseHandler):
             ddict = self._get_merged(ddict)
         return ddict
     def check_sparse(self, data):
-        for k in data.keys():
+        for k in list(data.keys()):
             d=data[k]
         if type(d)==csc_matrix:
             raise ml2h5.converter.ConversionError("Sparse matrices are not supported in ARFF files")
@@ -79,7 +79,7 @@ class H5_ARFF(BaseHandler):
 
         af = arff.ArffFile()
         af.data = self.get_data_as_list(data)
-        if data.has_key('names') and len(data['names']):
+        if 'names' in data and len(data['names']):
             af.attributes = data['names']
         else:
             attrs=[]
@@ -101,7 +101,7 @@ class H5_ARFF(BaseHandler):
                     num=1
                     prefix='str'
 
-                for i in xrange(num):
+                for i in range(num):
                     attrs.append('%s%d' % (prefix,idx))
                     idx+=1
 
@@ -126,7 +126,7 @@ class H5_ARFF(BaseHandler):
                 else:
                     types.append('string')
 
-        for i in xrange(len(types)):
+        for i in range(len(types)):
             t = types[i].split(':')
             af.attribute_types[af.attributes[i]] = t[0]
             if len(t) == 1:

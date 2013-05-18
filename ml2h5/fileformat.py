@@ -139,7 +139,7 @@ def infer_seperator(fname):
     seperator = None
     minimum = 1
 
-    for i in xrange(100): # try the first 100 lines
+    for i in range(100): # try the first 100 lines
         line = fp.readline(AUTODETECTION_MAXBUFLEN)
         if not line:
             break
@@ -222,7 +222,7 @@ def can_convert_h5_to(dst_type, h5_filename=None):
                 if ordering.issubset(set(h5['data'].keys())):
                     return True # TODO check if this is sparse data / ndarray data
             elif dst_type in ('csv', 'arff', 'rdata'): # csv/arff/RData support everything except sparse data
-                for k in h5['data'].keys():
+                for k in list(h5['data'].keys()):
                     if k.endswith('_indptr') or k.endswith('_indices'):
                         return False
                 return True

@@ -27,7 +27,7 @@ def parse_images(filename):
     height = obj.getElementsByTagName("height")[0].childNodes[0].toxml()
     depth = obj.getElementsByTagName("depth")[0].childNodes[0].toxml()
 
-    print "'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s" % (imgid,database,annotation,image,imageid,ownername,ownerid,width,height,depth)
+    print("'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s" % (imgid,database,annotation,image,imageid,ownername,ownerid,width,height,depth))
 
 def parse_labels(filename):
     imgid = filename.split(".")[0]
@@ -46,23 +46,23 @@ def parse_labels(filename):
         xmax = bndbox.getElementsByTagName("xmax")[0].childNodes[0].toxml()
         ymax = bndbox.getElementsByTagName("ymax")[0].childNodes[0].toxml()
 
-        print "'%s','%s','%s',%s,%s,%s,%s,%s" % (imgid,name,pose,difficult,xmin,ymin,xmax,ymax)
+        print("'%s','%s','%s',%s,%s,%s,%s,%s" % (imgid,name,pose,difficult,xmin,ymin,xmax,ymax))
 
 PARSE_LABELS = True
 
 if PARSE_LABELS:
-    print "@relation labels\n"
+    print("@relation labels\n")
     attr = ["id","name","pose","difficult","xmin","ymin","xmax","ymax"]
     attr_types = ["string","string","string","numeric","numeric","numeric","numeric","numeric"]
 else:
-    print "@relation images\n"
+    print("@relation images\n")
     attr = ["id","database","annotation","image","imageid","ownername","ownerid","width","height","depth"]
     attr_types = ["string","string","string","string","string","string","string","numeric","numeric","numeric"]
 
 for key in range(0,len(attr)):
-    print "@attribute %s %s" % (attr[key], attr_types[key])
+    print("@attribute %s %s" % (attr[key], attr_types[key]))
     
-print "\n@data"
+print("\n@data")
 
 for filename in os.listdir("."):
     if filename.split(".")[1] == "xml":

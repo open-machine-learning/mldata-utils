@@ -7,7 +7,7 @@ This module heavily relies on the functionality required for http://mldata.org
 import os, h5py, numpy
 import ml2h5.data
 from . import VERSION_MLDATA,NUM_EXTRACT
-from indexsplit import reduce_split_str
+from .indexsplit import reduce_split_str
 
 COMPRESSION = None
 
@@ -16,7 +16,7 @@ task_descr_fields = ['performance_measure','type']
 
 
 def update_object(h5, name, value):
-    if name in h5.keys():
+    if name in list(h5.keys()):
         del h5[name]
 
     h5[name] = value
@@ -62,12 +62,12 @@ def get_splitdata(fnames):
     names = get_splitnames(fnames)
     data = {}
     offset = 0
-    for i in xrange(len(fnames)):
+    for i in range(len(fnames)):
         count = sum(1 for line in open(fnames[i]))
         if names[i] in data: # in case we have multiple train/test idx
-            data[names[i]].extend(range(offset, offset+count))
+            data[names[i]].extend(list(range(offset, offset+count)))
         else:
-            data[names[i]] = range(offset, offset+count)
+            data[names[i]] = list(range(offset, offset+count))
         offset += count
 
     return data
@@ -103,7 +103,7 @@ def add_data(fname, splitnames=None, variables=None):
 
     if splitnames:
         data = get_splitdata(splitnames)
-        for k,v in data.iteritems():
+        for k,v in data.items():
             if v:
                 group.create_dataset(k, data=v, compression=COMPRESSION)
 
@@ -210,8 +210,8 @@ def get_taskinfo(fname):
     data_size = 0
     format = ml2h5.fileformat.get(fname)
     if not format in ('matlab','h5','octave'):
-        raise ml2h5.converter.ConversionError, 'Format not supported (only matlab, \
-                                                octave, h5) are supported'
+        raise ml2h5.converter.ConversionError('Format not supported (only matlab, \
+                                                octave, h5) are supported')
     try:
         c = ml2h5.converter.Converter(fname,
                 '/tmp/dummy_does_not_exist.h5', format_in=format, format_out='h5', attribute_names_first=False, merge=False, type='data')
@@ -219,14 +219,14 @@ def get_taskinfo(fname):
         
         for g in ('data','task'):
             for f in task_data_fields:
-                if data.has_key(g) and data[g].has_key(f):
+                if g in data and f in data[g]:
                     if not taskinfo:
                         taskinfo=dict()
                     taskinfo[f]=data[g][f]
                     if f in ['train_idx','val_idx','test_idx']:
                         data_size+=len(taskinfo[f])
                     
-        if 'data_split' in taskinfo.keys():
+        if 'data_split' in list(taskinfo.keys()):
             data_size=len(taskinfo['data_split'])
             idx=conv_image2idx(taskinfo['data_split'])
             del taskinfo['datasplit']
@@ -235,7 +235,7 @@ def get_taskinfo(fname):
                 taskinfo[key]=idx[key]
             
         for key in ['train_idx','val_idx','test_idx']:    
-            if not key in taskinfo.keys():
+            if not key in list(taskinfo.keys()):
                 taskinfo[key]=[]        
             if len(taskinfo[key])>0 and type(taskinfo[key][0])!=list:
                 taskinfo[key]=[taskinfo[key]]
@@ -321,17 +321,17 @@ def get_extract(fname):
     split_string_overflow=False
     idx={}
     extract_reduce={}
-    if 'train_idx' in h5['task'].keys():
+    if 'train_idx' in list(h5['task'].keys()):
         idx['train_idx']=h5['task/train_idx'][...]    
         for key in ['val_idx','test_idx']:
-            if key in h5['task'].keys():
+            if key in list(h5['task'].keys()):
                 idx[key]=h5['task'][key][...]
             else:
                 idx[key]=[]
                
                 
             
-    elif 'data_split' in h5['task'].keys():
+    elif 'data_split' in list(h5['task'].keys()):
         idx=conv_image2idx(h5['task/data_split'][...])
     try:
         for key in ['train_idx','val_idx','test_idx']:        
@@ -354,8 +354,8 @@ def get_extract(fname):
         reduce_split_nr=[str(i) for i in range(num_split_reduce)]
         if split_overflow:
             reduce_split_nr[-1]='...'    
-        extract['split_idx']=zip(range(len(extract['train_idx'])),extract['train_idx'],extract['val_idx'],extract['test_idx'])
-        extract['reduce_split_idx']=zip(reduce_split_nr,extract_reduce['train_idx'],extract_reduce['val_idx'],extract_reduce['test_idx'])
+        extract['split_idx']=list(zip(list(range(len(extract['train_idx']))),extract['train_idx'],extract['val_idx'],extract['test_idx']))
+        extract['reduce_split_idx']=list(zip(reduce_split_nr,extract_reduce['train_idx'],extract_reduce['val_idx'],extract_reduce['test_idx']))
         extract['split_overflow']=split_overflow
         extract['split_string_overflow']=split_string_overflow
     except KeyError:
@@ -382,7 +382,7 @@ def get_split_image(fname,split_nr,norm=1000):
     h5.close()
     # normalize to length of norm
     image_norm=numpy.zeros([norm,1])
-    for i in xrange(len(image_norm)):
+    for i in range(len(image_norm)):
         image_norm[i]=image_data[int(i*(float(len(image_data))/norm))]
     return image_norm.T[0]
 
@@ -419,7 +419,7 @@ def conv_idx2image(train_idx,val_idx,test_idx,last_idx):
             image_data[split_nr][val_split]=2
             image_data[split_nr][test_split]=3
         except IndexError:            
-            raise ml2h5.converter.ConversionError, 'Index out of Range' 
+            raise ml2h5.converter.ConversionError('Index out of Range') 
     return image_data
 
 
@@ -438,9 +438,9 @@ def conv_image2idx(img):
     test_idx=[]
 
     for split in img:
-        train_idx.append(numpy.array(range(len(split)))[split==1])
-        val_idx.append(numpy.array(range(len(split)))[split==2])
-        test_idx.append(numpy.array(range(len(split)))[split==3])
+        train_idx.append(numpy.array(list(range(len(split))))[split==1])
+        val_idx.append(numpy.array(list(range(len(split))))[split==2])
+        test_idx.append(numpy.array(list(range(len(split))))[split==3])
     return {'train_idx':train_idx,'val_idx':val_idx, 'test_idx':test_idx }  
 
 
@@ -455,7 +455,7 @@ def get_variables(fname):
     # FIXME: this might be completely wrong
     bucket, num_attr = ml2h5.data.get_num_instattr(fname)
     return {
-        'input': range(num_attr)[1:],
+        'input': list(range(num_attr))[1:],
         'output': 0,
     }
 

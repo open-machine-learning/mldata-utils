@@ -40,7 +40,7 @@ class OutputsBinClass(OutputsClassification):
     def init_id(self, str_label):
         """Discover the names of the labels"""
         all_names = unique(str_label)
-        all_names = map(str, all_names)
+        all_names = list(map(str, all_names))
         assert(len(all_names) == 2)
         self.name2id = {all_names[0]: 1,
                         all_names[1]: -1,
@@ -65,7 +65,7 @@ class OutputsMultiClass(OutputsClassification):
     def init_id(self, str_label):
         """Discover the names of the labels"""
         all_names = unique(str_label)
-        all_names = map(str, all_names)
+        all_names = list(map(str, all_names))
         assert(len(all_names) > 2)
         self.name2id = {}
         self.id2name = {}
@@ -93,7 +93,7 @@ class OutputsRegression(Outputs):
 
     def label2str(self, preds):
         """Convert predictions into strings"""
-        return map(str, preds)
+        return list(map(str, preds))
 
 def init_output(task_type):
     """A factory for creating the right output class"""

@@ -110,6 +110,6 @@ if __name__ == "__main__":
             c.run(verify=Options.verify)
             if Options.verify:
                 c.verify()    
-    except ml2h5.converter.ConversionError, e:
+    except ml2h5.converter.ConversionError as e:
         e.print_error()
         sys.exit(1)

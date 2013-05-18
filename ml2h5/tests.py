@@ -6,17 +6,17 @@ import random
 import os
 import unittest
 
-from converter.h5_csv import H5_CSV
-from converter.h5_arff import H5_ARFF
-from converter.h5_libsvm import H5_LibSVM
-from converter.h5_mat import H5_MAT
-from converter.h5_octave import H5_OCTAVE
-from converter.h5_rdata import H5_RData
-from converter.h5_uci import H5_UCI
-from converter.basehandler import BaseHandler
+from .converter.h5_csv import H5_CSV
+from .converter.h5_arff import H5_ARFF
+from .converter.h5_libsvm import H5_LibSVM
+from .converter.h5_mat import H5_MAT
+from .converter.h5_octave import H5_OCTAVE
+from .converter.h5_rdata import H5_RData
+from .converter.h5_uci import H5_UCI
+from .converter.basehandler import BaseHandler
 
-import converter
-import fileformat
+from . import converter
+from . import fileformat
 import sys
 import getopt
 import datetime
@@ -212,21 +212,21 @@ class PerformanceTests:
     def test_many_attributes_conversion(self):
         """Measure time of arff -> h5 conversion
         """
-        print self.start_test("Arff conversion")
+        print(self.start_test("Arff conversion"))
 
         conv = converter.Converter(FIXTURES['big-arff'], RESULTS['h5'])
         conv.run(verify=True)
 
-        print self.stop_test()
+        print(self.stop_test())
         
     def test_many_attributes_types(self):
         """Measure time of getting the attributes
         """
-        print self.start_test("Many attributes - get types")
+        print(self.start_test("Many attributes - get types"))
 
         ml2h5.data.get_attribute_types(RESULTS['h5'])
 
-        print self.stop_test()
+        print(self.stop_test())
         
     def main(self):
         """Run tests
@@ -243,14 +243,14 @@ def main():
     # parse command line options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
-    except getopt.error, msg:
-        print msg
-        print "for help use --help"
+    except getopt.error as msg:
+        print(msg)
+        print("for help use --help")
         sys.exit(2)
     # process options
     for o, a in opts:
         if o in ("-h", "--help"):
-            print __usage__
+            print(__usage__)
             sys.exit(0)
     
     if len(sys.argv) <= 1:
@@ -259,7 +259,7 @@ def main():
         per = PerformanceTests()
         per.main()
     else:
-        print __usage__
+        print(__usage__)
 
 if __name__ == '__main__':
     main()

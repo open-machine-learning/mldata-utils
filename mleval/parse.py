@@ -8,7 +8,7 @@ def parse_floats(fil):
     fil.seek(0)
 
     values=list()
-    for l in fil.xreadlines():
+    for l in fil:
         values.append( [ float(e) for e in l.split() ] )
 
     return numpy.array(values)
@@ -24,10 +24,10 @@ def parse_strings(output_file, label_file):
     output_valid_values=set()
     label_valid_values=set()
 
-    for l in output_file.xreadlines():
+    for l in output_file:
         output_valid_values.add(l.strip())
 
-    for l in label_file.xreadlines():
+    for l in label_file:
         label_valid_values.add(l.strip())
 
     if len(output_valid_values)>2 or len(label_valid_values)>2:
@@ -58,11 +58,11 @@ def parse_strings(output_file, label_file):
     label_file.seek(0)
 
     output_values=list()
-    for l in output_file.xreadlines():
+    for l in output_file:
         output_values.append( [ float(map_dict[e.strip()]) for e in l.split() ] )
 
     label_values=list()
-    for l in label_file.xreadlines():
+    for l in label_file:
         label_values.append( [ float(map_dict[e.strip()]) for e in l.split() ] )
 
 
