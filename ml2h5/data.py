@@ -3,13 +3,13 @@ Handle Data objects and files.
 
 This module heavily relies on the functionality required for http://mldata.org
 """
+from __future__ import unicode_literals
 
 import h5py, numpy, os, copy, tarfile, zipfile, bz2, gzip
 from scipy.sparse import csc_matrix
 
 from . import fileformat, converter
 from . import NUM_EXTRACT, LEN_EXTRACT
-from __future__ import unicode_literals
 
 def get_num_instattr(fname):
     """Retrieve number of instances and number of attributes from given HDF5 file.

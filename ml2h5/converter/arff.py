@@ -271,16 +271,16 @@ class ArffFile(object):
 
     def dump(self):
         """Print an overview of the ARFF file."""
-        print "Relation " + self.relation
-        print "  With attributes"
+        print("Relation " + self.relation)
+        print("  With attributes")
         for n in self.attributes:
             if self.attribute_types[n] != 'nominal':
-                print "    %s of type %s" % (n, self.attribute_types[n])
+                print("    %s of type %s" % (n, self.attribute_types[n]))
             else:
-                print ("    " + n + " of type nominal with values " +
-                       ', '.join(self.attribute_data[n]))
+                print(("    " + n + " of type nominal with values " +
+                       ', '.join(self.attribute_data[n])))
         for d in self.data:
-            print d
+            print(d)
     
 
 
@@ -301,4 +301,4 @@ d, 3
 
     a = ArffFile.load('../examples/diabetes.arff')
 
-    print a.write()
+    print(a.write())
