@@ -8,8 +8,8 @@ from __future__ import unicode_literals
 import h5py, numpy, os, copy, tarfile, zipfile, bz2, gzip
 from scipy.sparse import csc_matrix
 
-from . import fileformat, converter
-from . import NUM_EXTRACT, LEN_EXTRACT
+from ml2h5 import converter
+from ml2h5 import NUM_EXTRACT, LEN_EXTRACT
 
 def get_num_instattr(fname):
     """Retrieve number of instances and number of attributes from given HDF5 file.
@@ -171,7 +171,7 @@ def get_extract(fname):
     @return: extract of an HDF5 file
     @rtype: dict with HDF5 attribute/dataset names as keys and their data as values
     """
-    format = fileformat.get(fname)
+    format = ml2h5.fileformat.get(fname)
     if fname.endswith('.h5'):
         fname_h5 = fname
     else:

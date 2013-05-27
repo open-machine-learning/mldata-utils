@@ -2,7 +2,7 @@ import h5py, numpy
 import rpy2.robjects as robjects
 import rpy2.robjects.numpy2ri
 import rpy2.rlike.container as rlc
-from .basehandler import BaseHandler
+from ml2h5.converter.basehandler import BaseHandler
 
 
 class H5_RData(BaseHandler):

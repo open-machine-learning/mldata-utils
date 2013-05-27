@@ -1,6 +1,6 @@
 import numpy, h5py, os, copy
 from scipy.sparse import csc_matrix
-from .basehandler import BaseHandler
+from ml2h5.converter.basehandler import BaseHandler
 import ml2h5.converter
 
 

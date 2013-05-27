@@ -1,8 +1,8 @@
 import h5py, numpy, copy
-from . import arff
-from .basehandler import BaseHandler
-from scipy.sparse import csc_matrix
 import ml2h5.converter
+from ml2h5.converter import arff
+from ml2h5.converter.basehandler import BaseHandler
+from scipy.sparse import csc_matrix
 
 
 class H5_ARFF(BaseHandler):

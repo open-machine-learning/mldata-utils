@@ -1,5 +1,5 @@
 import os, numpy
-from .basehandler import BaseHandler
+from ml2h5.converter.basehandler import BaseHandler
 
 
 class H5_UCI(BaseHandler):

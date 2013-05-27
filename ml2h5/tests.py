@@ -5,24 +5,24 @@ Coverts correctness and performance
 import random
 import os
 import unittest
-
-from .converter.h5_csv import H5_CSV
-from .converter.h5_arff import H5_ARFF
-from .converter.h5_libsvm import H5_LibSVM
-from .converter.h5_mat import H5_MAT
-from .converter.h5_octave import H5_OCTAVE
-from .converter.h5_rdata import H5_RData
-from .converter.h5_uci import H5_UCI
-from .converter.basehandler import BaseHandler
-
-from . import converter
-from . import fileformat
 import sys
 import getopt
 import datetime
+import numpy
+
 import ml2h5
 from mleval import other
-import numpy
+from ml2h5 import converter
+from ml2h5 import fileformat
+from ml2h5.converter.h5_csv import H5_CSV
+from ml2h5.converter.h5_arff import H5_ARFF
+from ml2h5.converter.h5_libsvm import H5_LibSVM
+from ml2h5.converter.h5_mat import H5_MAT
+from ml2h5.converter.h5_octave import H5_OCTAVE
+from ml2h5.converter.h5_rdata import H5_RData
+from ml2h5.converter.h5_uci import H5_UCI
+from ml2h5.converter.basehandler import BaseHandler
+
 
 __doc__
 

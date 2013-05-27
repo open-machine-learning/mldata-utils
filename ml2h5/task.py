@@ -6,8 +6,8 @@ This module heavily relies on the functionality required for http://mldata.org
 
 import os, h5py, numpy
 import ml2h5.data
-from . import VERSION_MLDATA,NUM_EXTRACT
-from .indexsplit import reduce_split_str
+from ml2h5 import VERSION_MLDATA,NUM_EXTRACT
+from ml2h5.indexsplit import reduce_split_str
 
 COMPRESSION = None
 

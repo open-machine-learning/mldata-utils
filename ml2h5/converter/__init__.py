@@ -17,14 +17,14 @@ from gettext import gettext as _
 from scipy.sparse import csc_matrix
 
 import ml2h5.fileformat
-from .h5_arff import H5_ARFF
-from .h5_libsvm import H5_LibSVM
-from .h5_csv import H5_CSV
-from .h5_mat import H5_MAT
-from .h5_octave import H5_OCTAVE
-from .h5_rdata import H5_RData
-#from h5_uci import H5_UCI
-from .basehandler import BaseHandler
+from ml2h5.converter.h5_arff import H5_ARFF
+from ml2h5.converter.h5_libsvm import H5_LibSVM
+from ml2h5.converter.h5_csv import H5_CSV
+from ml2h5.converter.h5_mat import H5_MAT
+from ml2h5.converter.h5_octave import H5_OCTAVE
+from ml2h5.converter.h5_rdata import H5_RData
+#from ml2h5.converter.h5_uci import H5_UCI
+from ml2h5.converter.basehandler import BaseHandler
 
 HANDLERS = {
     'libsvm': H5_LibSVM,

@@ -1,6 +1,6 @@
 import h5py, numpy
 from scipy.io import savemat, loadmat
-from .basehandler import BaseHandler
+from ml2h5.converter.basehandler import BaseHandler
 
 import sys
 if sys.version < '3':
