@@ -11,6 +11,7 @@ import datetime
 import numpy
 
 import ml2h5
+import ml2h5.converter
 from mleval import other
 from ml2h5 import converter
 from ml2h5 import fileformat
@@ -20,7 +21,7 @@ from ml2h5.converter.h5_libsvm import H5_LibSVM
 from ml2h5.converter.h5_mat import H5_MAT
 from ml2h5.converter.h5_octave import H5_OCTAVE
 from ml2h5.converter.h5_rdata import H5_RData
-from ml2h5.converter.h5_uci import H5_UCI
+#from ml2h5.converter.h5_uci import H5_UCI
 from ml2h5.converter.basehandler import BaseHandler
 
 
@@ -29,7 +30,7 @@ __doc__
 FIXTURES = {
     'csv': '../fixtures/test.csv',
     'arff': '../fixtures/iris.arff',
-    'uci': '../fixtures/iris.data',
+    #'uci': '../fixtures/iris.data',
     'R': '../fixtures/iris.Rdata',
     'libsvm': '../fixtures/breast-cancer.txt',
     'h5': '../examples/uci-20070111-zoo.h5',
@@ -74,11 +75,11 @@ class TestConversion(unittest.TestCase):
         self.assertEqual(data['data']['sepallength'][3], 4.6,
                          'wrong first integer')
 
-    def test_read_uci(self):
-        conv = H5_UCI(self.fixtures['uci'])
-        data = conv.read()
-        self.assertEqual(data['data']['sepallength'][3], 4.6,
-                         'wrong first integer')
+    #def test_read_uci(self):
+    #    conv = H5_UCI(self.fixtures['uci'])
+    #    data = conv.read()
+    #    self.assertEqual(data['data']['sepallength'][3], 4.6,
+    #                     'wrong first integer')
 
     def test_read_rdata(self):
         pass
@@ -132,8 +133,8 @@ class TestConversion(unittest.TestCase):
         # Rdata reading not supported
         pass
 
-    def test_uci2h5(self):
-        self.conversion_in(self.fixtures['uci'],self.result['h5'])
+    #def test_uci2h5(self):
+    #    self.conversion_in(self.fixtures['uci'],self.result['h5'])
 
     # CONVERSIONS OUT
     def conversion_out(self, type, Conv):
