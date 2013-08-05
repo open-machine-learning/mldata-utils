@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 VERSION='0.5.3'
 DESCRIPTION='Utilities around hdf5 and for compute performance measures',
