@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import h5py, numpy, os, copy, tarfile, zipfile, bz2, gzip
 from scipy.sparse import csc_matrix
 
+import ml2h5
 from ml2h5 import NUM_EXTRACT, LEN_EXTRACT
 
 def get_num_instattr(fname):
